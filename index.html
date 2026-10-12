@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handball Path - Manager</title>
+    <style>
+        /* BASE & THEME VARIABLES */
+        :root {
+            --bg-dark: #030712;
+            --bg-gradient: #082f49;
+            --accent: #38bdf8;
+            
+            --surface: rgba(11, 15, 25, 0.65);
+            --surface-hover: rgba(17, 24, 39, 0.85);
+            --border: rgba(255, 255, 255, 0.1);
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --gold: #fbbf24;
+            --success: #34d399;
+            --danger: #f87171;
+        }
+
+        /* THEME CLASSES */
+        body.theme-blue { --bg-gradient: #082f49; --accent: #38bdf8; }
+        body.theme-red { --bg-gradient: #450a0a; --accent: #f87171; }
+        body.theme-green { --bg-gradient: #022c22; --accent: #34d399; }
+        body.theme-yellow { --bg-gradient: #422006; --accent: #fbbf24; }
+        body.theme-gray { --bg-gradient: #1f2937; --accent: #d1d5db; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient) 0%, var(--bg-dark) 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 650px; }
+
+        /* TYPOGRAPHY */
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { 
+            margin: 0; font-size: 2rem; font-weight: 900; letter-spacing: 3px; 
+            background: linear-gradient(to right, #ffffff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .subtitle { font-size: 0.75rem; color: var(--text-muted); letter-spacing: 4px; text-transform: uppercase; margin-top: 6px; }
+        h2 { font-size: 1.3rem; margin-top: 0; color: #fff; }
+        h3 { font-size: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
+
+        /* SCREENS & TRANSITIONS */
+        .screen { display: none; animation: fadeIn 0.4s ease-out; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .card { 
+            background-color: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* FORMS */
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+        input, select { 
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text-main); 
+            padding: 12px; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; outline: none; 
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        option { background: var(--bg-dark); color: #fff; }
+
+        /* BUTTONS */
+        .primary-btn { background: #fff; color: #000; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+        .primary-btn:hover { opacity: 0.9; transform: scale(0.99); }
+        .primary-btn:disabled { background: #374151; color: #9ca3af; cursor: not-allowed; transform: none; }
+        
+        .action-btn { background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: var(--text-main); width: 100%; padding: 14px 16px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; transition: all 0.2s; }
+        .action-btn:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--accent); transform: translateX(3px); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-btn small { display: block; color: var(--text-muted); font-weight: normal; font-size: 0.75rem; margin-top: 4px; }
+
+        .back-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .back-btn:hover { color: #fff; border-color: var(--accent); background: rgba(255,255,255,0.05); }
+
+        /* TOP BAR */
+        .top-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; background: var(--surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .top-stat { display: flex; flex-direction: column; align-items: center; }
+        .top-stat span { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .top-stat strong { font-size: 1rem; font-weight: 700; margin-top: 4px; }
+        
+        /* STATUS BANNER */
+        .status-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .status-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+        .status-pill span { color: var(--text-muted); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; }
+
+        /* HUB DASHBOARD */
+        .hub-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding: 0 5px; }
+        .hub-player { font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0; display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .hub-team { font-size: 0.85rem; color: var(--accent); font-weight: 600; margin-top: 4px; letter-spacing: 0.5px; }
+        .hub-week { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .dash-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+        .dash-card:hover { border-color: var(--accent); background: var(--surface-hover); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .dash-card.match { grid-column: span 2; border-color: var(--accent); background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(56, 189, 248, 0.05)); text-align: center; padding: 30px 20px; }
+        .dash-card.match:hover { background: linear-gradient(to right, rgba(0,0,0,0.3), rgba(56, 189, 248, 0.15)); }
+        .dash-icon { font-size: 2.2rem; margin-bottom: 12px; display: block; }
+        .dash-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .dash-desc { font-size: 0.75rem; color: var(--text-muted); }
+        .badge { position: absolute; top: 12px; right: 12px; background: var(--accent); color: #000; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 10px; }
+
+        /* STATS GRID */
+        .stats-grid-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+        .stat-item span { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+        .stat-item strong { font-size: 1.1rem; color: #fff; font-weight: 800; }
+
+        /* TROPHY ITEMS */
+        .trophy-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; transition: all 0.2s; }
+        .trophy-item.unlocked { border-color: var(--gold); background: rgba(251, 191, 36, 0.05); }
+        .trophy-icon { font-size: 2rem; width: 50px; text-align: center; filter: grayscale(1); opacity: 0.4; }
+        .trophy-item.unlocked .trophy-icon { filter: none; opacity: 1; }
+        .trophy-info h4 { margin: 0 0 4px 0; font-size: 1rem; color: #fff; }
+        .trophy-info p { margin: 0; font-size: 0.75rem; color: var(--text-muted); }
+
+        /* TABLES & LISTS */
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        th { background: rgba(0,0,0,0.3); color: var(--text-muted); padding: 10px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; border-radius: 6px 6px 0 0; }
+        td { padding: 12px 10px; border-top: 1px solid var(--border); }
+        tr.is-player { background: rgba(255,255,255,0.05); font-weight: bold; color: var(--accent); }
+
+        .timeline-item { padding-left: 16px; margin-bottom: 16px; border-left: 2px solid var(--border); font-size: 0.85rem; line-height: 1.5; }
+        .timeline-item.match { border-left-color: var(--gold); }
+        .timeline-item.event { border-left-color: var(--accent); }
+        .timeline-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px; }
+
+        /* MATCH SCREEN */
+        .match-header { text-align: center; padding: 30px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .match-vs { font-size: 2.2rem; font-weight: 900; margin: 10px 0; color: #fff; }
+        .match-score { font-size: 3.5rem; font-weight: 900; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+
+        /* SAVE SLOTS */
+        .save-slot { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+        .save-info { font-size: 0.9rem; margin-bottom: 10px; color: #fff; font-weight: 600; }
+        .save-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; }
+        .save-actions { display: flex; gap: 8px; }
+
+        .footer-reset { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .reset-btn { background: transparent; border: none; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; cursor: pointer; transition: color 0.2s; }
+        .reset-btn:hover { color: var(--danger); }
+    </style>
+</head>
+<body class="theme-blue">
+
+<div class="container">
+    <header>
+        <h1>HANDBALL PATH</h1>
+        <div class="subtitle">Career Simulator</div>
+    </header>
+
+    <!-- SCREEN: SETUP -->
+    <div id="screen-setup" class="screen active card">
+        <h3>Spieler-Profil erstellen</h3>
+        
+        <div class="form-group">
+            <label>Name des Spielers</label>
+            <input type="text" id="setup-name" value="Lukas Novak">
+        </div>
+
+        <div class="form-group">
+            <label>Spielposition</label>
+            <select id="setup-position">
+                <option value="Rückraum-Shooter">Rückraum-Shooter (Halblinker)</option>
+                <option value="Spielmacher">Spielmacher (Mitte)</option>
+                <option value="Außenspieler">Außenspieler (Außen)</option>
+                <option value="Kreisläufer">Kreisläufer</option>
+                <option value="Torwart">Torwart</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Karriere-Startzeitpunkt</label>
+            <select id="setup-era">
+                <option value="15">Jugendlicher (Alter 15 - Start im Jugendbereich)</option>
+                <option value="18">Junger Erwachsener (Alter 18 - 3. Liga)</option>
+                <option value="21">Profi (Alter 21 - 1. Bundesliga ⭐⭐⭐⭐⭐)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Talent & Ausgangsbasis</label>
+            <select id="setup-tier-type">
+                <option value="rookie">Rohdiamant (Geringe Startwerte)</option>
+                <option value="balanced" selected>Ausgewogenes Talent</option>
+                <option value="prodigy">Wunderkind (Hohe Startwerte)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Primärer Fokus-Schwerpunkt</label>
+            <select id="setup-focus">
+                <option value="shooting">Wurf-Spezialist (+12 Wurf, +4 Übersicht)</option>
+                <option value="athleticism">Athletik-Maschine (+12 Athletik, +4 Wurf)</option>
+                <option value="iq">Spielmacher-IQ (+12 Übersicht, +4 Athletik)</option>
+                <option value="balanced_focus">Vielseitiger Allrounder (+6 auf alles)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Heimat-Region</label>
+            <select id="setup-region">
+                <option value="Berlin / Brandenburg">Berlin / Brandenburg</option>
+                <option value="Norddeutschland">Norddeutschland</option>
+                <option value="Rhein-Neckar">Rhein-Neckar Region</option>
+                <option value="Westfalen / NRW">Westfalen / NRW</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Design-Theme</label>
+            <select id="setup-theme" onchange="changeTheme()">
+                <option value="blue">Tiefblau (Klassisch)</option>
+                <option value="red">Dunkelrot (Aggressiv)</option>
+                <option value="green">Smaragdgrün (Dynamisch)</option>
+                <option value="yellow">Bernstein-Gelb (Leuchtend)</option>
+                <option value="gray">Schiefer-Grau (Minimalistisch)</option>
+            </select>
+        </div>
+
+        <button class="primary-btn" onclick="startCareer()" style="margin-top: 10px;">Karriere starten</button>
+        <button class="action-btn" onclick="openSaveMenu()" style="margin-top: 15px; justify-content:center; background:rgba(255,255,255,0.05); color:var(--text-main);">
+            💾 Spielstand laden / verwalten
+        </button>
+    </div>
+
+    <!-- GLOBAL TOP BAR -->
+    <div id="global-top-bar" class="top-bar" style="display: none;">
+        <div class="top-stat"><span>Wurf</span><strong id="bar-shoot">0</strong></div>
+        <div class="top-stat"><span>Athletik</span><strong id="bar-ath">0</strong></div>
+        <div class="top-stat"><span>IQ</span><strong id="bar-iq">0</strong></div>
+        <div class="top-stat"><span>Energie</span><strong id="bar-nrg" style="color:var(--success);">100%</strong></div>
+        <div class="top-stat"><span>Budget</span><strong id="bar-money" style="color:var(--gold);">0 €</strong></div>
+    </div>
+
+    <!-- SCREEN: MAIN HUB (DASHBOARD) -->
+    <div id="screen-hub" class="screen">
+        <div class="hub-header">
+            <div style="flex:1;">
+                <h2 class="hub-player">
+                    <span id="hub-name">-</span>
+                    <button onclick="openSaveMenu()" title="Speichern & Laden" style="background:transparent; border:none; cursor:pointer; font-size:1.4rem; padding:0; filter: grayscale(0.5); transition: filter 0.2s;">💾</button>
+                </h2>
+                <div id="hub-team" class="hub-team">-</div>
+            </div>
+            <div class="hub-week" style="margin-left: 10px;">
+                <div id="hub-date" style="font-weight: 700; color:#fff;">Woche 1/11</div>
+                <div id="hub-age">Alter 15</div>
+            </div>
+        </div>
+
+        <!-- STATUS BANNER -->
+        <div class="status-banner">
+            <div class="status-pill">
+                <div><span>Status</span><br><strong id="hub-injury-status" style="color:var(--success);">Fit & Gesund</strong></div>
+                <span style="font-size:1.2rem;">💪</span>
+            </div>
+            <div class="status-pill">
+                <div><span>Trainer-Vertrauen</span><br><strong id="hub-trust-status" style="color:var(--accent);">75% (Startelf)</strong></div>
+                <span style="font-size:1.2rem;">🤝</span>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dash-card" onclick="openScreen('screen-training')">
+                <span class="dash-icon">🏋️</span>
+                <div class="dash-title">Trainingszentrum</div>
+                <div class="dash-desc">Werte verbessern</div>
+                <div id="badge-days" class="badge">4 Tage</div>
+            </div>
+            <div class="dash-card" onclick="openScreen('screen-shop')">
+                <span class="dash-icon">🛒</span>
+                <div class="dash-title">Ausrüstung & Lifestyle</div>
+                <div class="dash-desc">Wohnung, Auto & Boosts</div>
+            </div>
+            <div class="dash-card" onclick="openScreen('screen-league')">
+                <span class="dash-icon">📊</span>
+                <div class="dash-title">Ligatabelle</div>
+                <div class="dash-desc">Saison-Stand</div>
+            </div>
+            <div class="dash-card" onclick="openScreen('screen-trophies')">
+                <span class="dash-icon">🏆</span>
+                <div class="dash-title">Trophäen</div>
+                <div class="dash-desc">Erfolge & Meilensteine</div>
+            </div>
+            <div class="dash-card" onclick="openScreen('screen-stats')">
+                <span class="dash-icon">📈</span>
+                <div class="dash-title">Statistiken</div>
+                <div class="dash-desc">Rekorde & Bilanzen</div>
+            </div>
+            <div class="dash-card" onclick="openScreen('screen-log')">
+                <span class="dash-icon">📖</span>
+                <div class="dash-title">Karriere-Log</div>
+                <div class="dash-desc">Historie</div>
+            </div>
+
+            <div class="dash-card match" onclick="openScreen('screen-match-prep')">
+                <div style="color:var(--accent); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px; font-weight:800; margin-bottom:8px;">Nächstes Spiel</div>
+                <div id="hub-next-opp" style="font-size: 1.6rem; font-weight:800; color:#fff;">-</div>
+                <div class="dash-desc" style="margin-top:10px;">Auf zum Spieltag ➔</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN: TRAINING -->
+    <div id="screen-training" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Trainingsplan</h3>
+                <span id="train-days-left" style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">4 Tage übrig</span>
+            </div>
+            <button class="action-btn" onclick="train('shooting')" id="btn-tr-shoot">
+                <span>Wurftraining<small>-15% Energie (Präzision)</small></span><span style="color:var(--accent);">+ Wurf</span>
+            </button>
+            <button class="action-btn" onclick="train('gym')" id="btn-tr-gym">
+                <span>Kraft & Athletik<small>-20% Energie (Kraftraum)</small></span><span style="color:var(--accent);">+ Ath</span>
+            </button>
+            <button class="action-btn" onclick="train('tactics')" id="btn-tr-iq">
+                <span>Videoanalyse<small>-10% Energie (Spiel-IQ)</small></span><span style="color:var(--accent);">+ IQ</span>
+            </button>
+            <button class="action-btn" onclick="train('rest')" id="btn-tr-rest">
+                <span>Regeneration<small>Erholung in der Freizeit</small></span><span style="color:var(--success);">+45% NRG</span>
+            </button>
+            <p id="train-msg" style="font-size:0.8rem; color:var(--text-muted); margin-top:15px; text-align:center;"></p>
+        </div>
+    </div>
+
+    <!-- SCREEN: SHOP & LIFESTYLE -->
+    <div id="screen-shop" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <h3>Ausrüstung & Lifestyle</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Verbessere dein Wohnen, fahre bessere Autos oder hole Profi-Boosts.</p>
+            
+            <div class="action-btn" style="display:block; cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff;">🏙️ Eigene Stadtwohnung</strong>
+                    <button class="primary-btn" id="btn-buy-apt" style="width:auto; padding:8px 16px; margin:0;" onclick="buyLifestyle('apartment', 5000)">5.000 €</button>
+                </div>
+                <small id="shop-apt-status">Aktuell: Elternhaus / WG-Zimmer (+10% wöchentliche Regeneration)</small>
+            </div>
+
+            <div class="action-btn" style="display:block; cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff;">🚗 Eigenes Sport-Auto</strong>
+                    <button class="primary-btn" id="btn-buy-car" style="width:auto; padding:8px 16px; margin:0;" onclick="buyLifestyle('car', 12000)">12.000 €</button>
+                </div>
+                <small id="shop-car-status">Aktuell: Öffentliche Verkehrsmittel (+15 Ansehen)</small>
+            </div>
+
+            <div class="action-btn" style="display:block; cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff;">👟 High-Tech Handballschuhe</strong>
+                    <button class="primary-btn" style="width:auto; padding:8px 16px; margin:0;" onclick="buyItem('shoes', 750)">750 €</button>
+                </div>
+                <small id="shop-shoe-status">Leistungs-Boost für 3 Spiele.</small>
+            </div>
+
+            <div class="action-btn" style="display:block; cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff;">🧠 Sportpsychologe (Mental-Coach)</strong>
+                    <button class="primary-btn" style="width:auto; padding:8px 16px; margin:0;" onclick="buyItem('psychologist', 1500)">1.500 €</button>
+                </div>
+                <small>Erhöht dauerhaft deinen Spiel-IQ (+4).</small>
+            </div>
+
+            <div class="action-btn" style="display:block; cursor:default;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong style="color:#fff;">🩹 Physio-Behandlung</strong>
+                    <button class="primary-btn" style="width:auto; padding:8px 16px; margin:0;" onclick="buyItem('physio', 900)">900 €</button>
+                </div>
+                <small>Füllt Energie auf 100% & senkt Trainingskosten.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN: LEAGUE -->
+    <div id="screen-league" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card" style="padding: 15px;">
+            <h3 style="margin: 10px 10px 20px 10px;">Ligatabelle</h3>
+            <table>
+                <thead>
+                    <tr><th style="width:25px;">#</th><th>Team</th><th style="text-align:center;">Sp</th><th style="text-align:center;">T+</th><th style="text-align:center;">Pkt</th></tr>
+                </thead>
+                <tbody id="league-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SCREEN: TROPHIES -->
+    <div id="screen-trophies" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <h3>🏆 Trophäen & Karriere-Erfolge</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Sammle Auszeichnungen auf deinem Weg zur Legende.</p>
+            <div id="trophies-container"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: STATS -->
+    <div id="screen-stats" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <h3>📈 Spieler-Statistiken</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Deine persönliche Karriere-Akte auf einen Blick.</p>
+            
+            <div class="stats-grid-box">
+                <div class="stat-item">
+                    <span>Absolvierte Spiele</span>
+                    <strong id="stat-matches">0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Erzielte Tore</span>
+                    <strong id="stat-goals">0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Gewonnene Spiele</span>
+                    <strong id="stat-wins">0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Siegquote</span>
+                    <strong id="stat-winrate">0%</strong>
+                </div>
+                <div class="stat-item" style="grid-column: span 2;">
+                    <span>Aktueller Sponsor</span>
+                    <strong id="stat-sponsor" style="color:var(--gold);">Kein Sponsor</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN: LOG -->
+    <div id="screen-log" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <h3>Karriere-Historie</h3>
+            <div id="timeline-box" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: MATCH PREP -->
+    <div id="screen-match-prep" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')" id="match-back-btn">← Zurück zum Dashboard</button>
+        <div class="card" id="match-container"></div>
+    </div>
+
+    <!-- SCREEN: TRANSFER & SPONSORS -->
+    <div id="screen-transfer" class="screen">
+        <div class="card">
+            <h2 style="color:var(--accent); text-align:center;">SAISON BEENDET & TRANSFERMARKT</h2>
+            <p style="text-align:center; color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Wähle deinen neuen Verein und verhandle deinen Sponsorenvertrag:</p>
+            
+            <div id="sponsor-offer-box" style="margin-bottom: 25px;"></div>
+            <div id="transfer-offers-container"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: SAVES -->
+    <div id="screen-saves" class="screen">
+        <button class="back-btn" onclick="closeSaveMenu()">← Zurück</button>
+        <div class="card">
+            <h3>💾 Speicherplätze</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Spielstände werden lokal in deinem Browser gesichert.</p>
+            <div id="save-slots-container"></div>
+        </div>
+    </div>
+
+    <!-- FOOTER RESET BUTTON (2 Klicks zum Start-Screen) -->
+    <div class="footer-reset">
+        <button class="reset-btn" onclick="confirmReset()">Spiel neu starten (Reset)</button>
+    </div>
+
+</div>
+
+<script>
+    /* --- DESIGN THEME CHANGER --- */
+    function changeTheme(forceTheme = null) {
+        let theme = forceTheme || document.getElementById('setup-theme').value;
+        document.body.className = "theme-" + theme;
+        if(forceTheme) document.getElementById('setup-theme').value = theme;
+    }
+
+    /* --- GAME STATE --- */
+    let game = {
+        name: "", position: "", region: "", club: "",
+        tier: 1, week: 1, seasonYear: 1, age: 15,
+        daysLeft: 4, shooting: 35, athleticism: 35, iq: 35,
+        energy: 100, money: 300, reputation: 15, activeBoostWeeks: 0,
+        weeklySponsorBonus: 0, sponsorName: "Kein Sponsor",
+        hasPhysioActive: false, theme: "blue", logs: [],
+        unlockedTrophies: [],
+        stats: { matches: 0, goals: 0, wins: 0 },
+        injuryWeeks: 0,
+        coachTrust: 75,
+        apartmentLevel: 0,
+        carLevel: 0
+    };
+
+    const trophiesData = [
+        { id: 'first_win', title: 'Erster Meilenstein', desc: 'Gewinne dein erstes Ligaspiel.', icon: '🤾‍♂️' },
+        { id: 'pro_player', title: 'Aufstieg in die Elite', desc: 'Erreiche die 1. Bundesliga (Profi-Bereich).', icon: '⭐' },
+        { id: 'cl_star', title: 'Champions League', desc: 'Wechsle zu einem internationalen Top-Klub (Barcelona/PSG).', icon: '🌍' },
+        { id: 'rich_player', title: 'Finanzieller Erfolg', desc: 'Sammle insgesamt 10.000 € an Budget.', icon: '💰' },
+        { id: 'sponsor_top', title: 'Marketing-Profi', desc: 'Schließe einen Sponsorenvertrag ab.', icon: '🤝' },
+        { id: 'veteran', title: 'Erfahrener Profi', desc: 'Erreiche das Alter von 18 Jahren.', icon: '🎂' },
+        { id: 'reputation_high', title: 'Fan-Liebling', desc: 'Erreiche ein Ansehen von 35 oder mehr.', icon: '🔥' }
+    ];
+
+    let leagueTeams = [];
+    let schedule = [];
+    let matchData = { opponent: "", playerGoals: 0, oppGoals: 0, scenariosQueue: [], currentScenarioIdx: 0, scoreBonus: 0, lastMatchWon: false };
+
+    const leagueData = {
+        1: ["JSG Spandau", "VfL Tegel Jgd", "HC Empor U17", "Füchse Nachwuchs", "VfL Potsdam Jun", "SGA Berlin", "Berliner TSC", "SG Hermsdorf"],
+        2: ["Füchse Berlin U19", "THW Kiel Jun", "SG Flensburg U19", "SC Magdeburg Jgd", "Rhein-Neckar Jgd", "FA Göppingen U19", "TSV Hannover U19", "Füchse Berlin II"],
+        3: ["Oranienburger HC", "HC Empor Rostock", "Stralsunder HV", "TSV Altenholz", "Füchse Berlin II", "VfL Potsdam", "Mecklenburg Schwerin", "HSV Hamburg II"],
+        4: ["VfL Potsdam", "TuS N-Lübbecke", "HSG Nordhorn", "Eintracht Hagen", "Dessau-Roßlauer", "GWD Minden", "ASV Hamm", "Bietigheim"],
+        5: ["SC Magdeburg", "Füchse Berlin", "THW Kiel", "SG Flensburg", "Rhein-Neckar Löwen", "MT Melsungen", "VfL Gummersbach", "TBV Lemgo"],
+        6: ["FC Barcelona", "Paris Saint-Germain", "Telekom Veszprém", "SC Magdeburg", "THW Kiel", "Aalborg Håndbold", "Industria Kielce", "OGC Nantes"]
+    };
+
+    function initLeague() {
+        let names = leagueData[game.tier];
+        leagueTeams = [{ name: game.club, played: 0, goalsFor: 0, points: 0, isPlayer: true }];
+        names.forEach(t => { if (t !== game.club) leagueTeams.push({ name: t, played: 0, goalsFor: 0, points: 0, isPlayer: false }); });
+        
+        schedule = [];
+        let opponents = leagueTeams.filter(t => !t.isPlayer);
+        for (let w = 1; w <= 11; w++) schedule.push(opponents[(w - 1) % opponents.length].name);
+    }
+
+    function startCareer() {
+        let nameInput = document.getElementById('setup-name').value.trim();
+        if (!nameInput) { alert("Bitte Namen eingeben."); return; }
+        
+        game.logs = [];
+        game.unlockedTrophies = [];
+        game.stats = { matches: 0, goals: 0, wins: 0 };
+        game.injuryWeeks = 0;
+        game.coachTrust = 75;
+        game.apartmentLevel = 0;
+        game.carLevel = 0;
+        
+        game.name = nameInput;
+        game.position = document.getElementById('setup-position').value;
+        game.region = document.getElementById('setup-region').value;
+        game.theme = document.getElementById('setup-theme').value;
+        
+        let startEra = parseInt(document.getElementById('setup-era').value);
+        game.age = startEra;
+
+        if (startEra === 15) { game.tier = 1; game.club = `${game.region} U17`; game.money = 300; }
+        else if (startEra === 18) { game.tier = 3; game.club = "Oranienburger HC (3. Liga)"; game.money = 1200; checkTrophies(); }
+        else if (startEra === 21) { game.tier = 5; game.club = "SC Magdeburg"; game.money = 5000; game.shooting = 62; game.athleticism = 62; game.iq = 62; checkTrophies(); }
+
+        let tierType = document.getElementById('setup-tier-type').value;
+        if (startEra !== 21) {
+            if (tierType === 'rookie') { game.shooting = 28; game.athleticism = 28; game.iq = 28; }
+            else if (tierType === 'balanced') { game.shooting = 35; game.athleticism = 35; game.iq = 35; }
+            else if (tierType === 'prodigy') { game.shooting = 42; game.athleticism = 42; game.iq = 42; }
+        }
+
+        let focus = document.getElementById('setup-focus').value;
+        if (focus === 'shooting') { game.shooting += 8; game.iq += 2; }
+        else if (focus === 'athleticism') { game.athleticism += 8; game.shooting += 2; }
+        else if (focus === 'iq') { game.iq += 8; game.athleticism += 2; }
+        else if (focus === 'balanced_focus') { game.shooting += 4; game.athleticism += 4; game.iq += 4; }
+
+        initLeague();
+        document.getElementById('global-top-bar').style.display = 'grid';
+        logTimeline("Start", `Karriere als ${game.position} bei ${game.club} gestartet.`, "event");
+        updateAllData();
+        openScreen('screen-hub');
+    }
+
+    /* --- RESET & 2-CLICK BACK TO START --- */
+    let resetClicks = 0;
+    function confirmReset() {
+        let btn = document.querySelector('.reset-btn');
+        if (resetClicks === 0) {
+            resetClicks = 1;
+            btn.innerText = "Wirklich neu starten? (Nochmal klicken)";
+            btn.style.color = "var(--danger)";
+            setTimeout(() => { 
+                resetClicks = 0; 
+                btn.innerText = "Spiel neu starten (Reset)"; 
+                btn.style.color = "var(--text-muted)"; 
+            }, 4000);
+        } else {
+            resetClicks = 0;
+            btn.innerText = "Spiel neu starten (Reset)";
+            btn.style.color = "var(--text-muted)";
+            game.name = "";
+            document.getElementById('global-top-bar').style.display = 'none';
+            openScreen('screen-setup');
+        }
+    }
+
+    /* --- LIFESTYLE PURCHASES --- */
+    function buyLifestyle(type, cost) {
+        if (game.money < cost) { alert("Nicht genug Geld!"); return; }
+        
+        if (type === 'apartment') {
+            if (game.apartmentLevel >= 2) { alert("Du hast bereits das luxuriöseste Penthouse!"); return; }
+            game.money -= cost;
+            game.apartmentLevel++;
+            let name = game.apartmentLevel === 1 ? "Stadtwohnung" : "Luxus-Penthouse";
+            game.reputation += (game.apartmentLevel === 1 ? 5 : 12);
+            logTimeline("Lifestyle", `Umgezogen in: ${name}.`, "event");
+            alert(`Erfolgreich in eine ${name} eingezogen!`);
+        } else if (type === 'car') {
+            if (game.carLevel >= 1) { alert("Du besitzt bereits einen Sportwagen!"); return; }
+            game.money -= cost;
+            game.carLevel++;
+            game.reputation += 10;
+            logTimeline("Lifestyle", "Sportwagen gekauft.", "event");
+            alert("Sportwagen erfolgreich gekauft! Dein Ansehen ist gestiegen.");
+        }
+        updateAllData();
+    }
+
+    /* --- INJURY & TRUST CHECKS --- */
+    function checkInjuryRisk() {
+        if (game.energy < 15 && Math.random() < 0.40) {
+            game.injuryWeeks = Math.floor(Math.random() * 2) + 1;
+            logTimeline("Verletzung", `Muskelzerrung! Du musst ${game.injuryWeeks} Woche(n) pausieren.`, "match");
+            alert(`⚠️ Überlastung! Du hast dir eine Verletzung zugezogen und musst ${game.injuryWeeks} Woche(n) pausieren!`);
+        }
+    }
+
+    function checkTrophies() {
+        trophiesData.forEach(t => {
+            if (!game.unlockedTrophies.includes(t.id)) {
+                let unlocked = false;
+                if (t.id === 'first_win' && game.stats.wins > 0) unlocked = true;
+                if (t.id === 'pro_player' && game.tier >= 5) unlocked = true;
+                if (t.id === 'cl_star' && game.tier >= 6) unlocked = true;
+                if (t.id === 'rich_player' && game.money >= 10000) unlocked = true;
+                if (t.id === 'sponsor_top' && game.weeklySponsorBonus > 0) unlocked = true;
+                if (t.id === 'veteran' && game.age >= 18) unlocked = true;
+                if (t.id === 'reputation_high' && game.reputation >= 35) unlocked = true;
+
+                if (unlocked) {
+                    game.unlockedTrophies.push(t.id);
+                    logTimeline("Trophäe", `🏆 Neue Trophäe freigeschaltet: "${t.title}"!`, "event");
+                }
+            }
+        });
+    }
+
+    function renderTrophiesUI() {
+        let container = document.getElementById('trophies-container');
+        container.innerHTML = "";
+        trophiesData.forEach(t => {
+            let isUnlocked = game.unlockedTrophies.includes(t.id);
+            container.innerHTML += `
+                <div class="trophy-item ${isUnlocked ? 'unlocked' : ''}">
+                    <div class="trophy-icon">${t.icon}</div>
+                    <div class="trophy-info">
+                        <h4>${t.title} ${isUnlocked ? '✅' : '🔒'}</h4>
+                        <p>${t.desc}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    /* --- SAVE & LOAD SYSTEM --- */
+    function openSaveMenu() {
+        renderSaveSlots();
+        openScreen('screen-saves');
+    }
+
+    function closeSaveMenu() {
+        if (game.name !== "") openScreen('screen-hub');
+        else openScreen('screen-setup');
+    }
+
+    function renderSaveSlots() {
+        let container = document.getElementById('save-slots-container');
+        container.innerHTML = "";
+        for (let i = 1; i <= 3; i++) {
+            let savedDataStr = localStorage.getItem('handball_save_' + i);
+            let isEmpty = !savedDataStr;
+            let infoHtml = "Kein Spielstand", subHtml = "Slot " + i + " ist leer.", loadBtn = "", delBtn = "", saveLabel = "Hier speichern";
+            
+            if (!isEmpty) {
+                try {
+                    let parsed = JSON.parse(savedDataStr);
+                    infoHtml = `👤 ${parsed.game.name}`;
+                    subHtml = `🛡️ ${parsed.game.club} | Woche ${parsed.game.week} (Alter ${parsed.game.age})`;
+                    loadBtn = `<button class="primary-btn" style="flex:1;" onclick="loadGame(${i})">Laden</button>`;
+                    delBtn = `<button class="primary-btn" style="flex:0.5; background:rgba(248, 113, 113, 0.2); color:var(--danger);" onclick="deleteSave(${i})">🗑️</button>`;
+                    saveLabel = "Überschreiben";
+                } catch(e) { subHtml = "Fehlerhafter Spielstand."; }
+            }
+            let saveBtn = game.name !== "" ? `<button class="primary-btn" style="flex:1; background:var(--surface-hover); color:#fff; border:1px solid var(--border);" onclick="saveGame(${i})">${saveLabel}</button>` : "";
+
+            container.innerHTML += `<div class="save-slot"><div class="save-info">${infoHtml}</div><div class="save-sub">${subHtml}</div><div class="save-actions">${loadBtn}${saveBtn}${delBtn}</div></div>`;
+        }
+    }
+
+    function saveGame(slot) {
+        if (game.name === "") return;
+        localStorage.setItem('handball_save_' + slot, JSON.stringify({ game, leagueTeams, schedule }));
+        renderSaveSlots();
+        alert(`Spiel auf Slot ${slot} gespeichert!`);
+    }
+
+    function loadGame(slot) {
+        let savedDataStr = localStorage.getItem('handball_save_' + slot);
+        if (savedDataStr) {
+            let parsed = JSON.parse(savedDataStr);
+            game = parsed.game; leagueTeams = parsed.leagueTeams; schedule = parsed.schedule;
+            changeTheme(game.theme);
+            document.getElementById('global-top-bar').style.display = 'grid';
+            updateAllData(); renderLogsUI(); renderTrophiesUI();
+            openScreen('screen-hub');
+        }
+    }
+
+    function deleteSave(slot) {
+        if (confirm(`Slot ${slot} löschen?`)) { localStorage.removeItem('handball_save_' + slot); renderSaveSlots(); }
+    }
+
+    /* --- SCREEN NAVIGATION & DATA UPDATE --- */
+    function openScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        
+        if (screenId === 'screen-trophies') renderTrophiesUI();
+        if (screenId === 'screen-stats') updateStatsUI();
+        
+        if (screenId === 'screen-match-prep') {
+            if (game.injuryWeeks > 0) {
+                document.getElementById('match-container').innerHTML = `
+                    <div class="match-header" style="border:none;">
+                        <h3 style="color:var(--danger);">Verletzt!</h3>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin:15px 0;">Du kannst wegen einer Verletzung noch ${game.injuryWeeks} Woche(n) nicht spielen.</p>
+                        <button class="primary-btn" onclick="openScreen('screen-hub')">Zurück zum Dashboard</button>
+                    </div>
+                `;
+                return;
+            }
+
+            document.getElementById('match-container').innerHTML = `
+                <div class="match-header" style="border:none;">
+                    <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px;">Spieltag - Woche ${game.week}</div>
+                    <div class="match-vs">${schedule[game.week - 1]}</div>
+                    <p style="font-size:0.85rem; color:var(--text-muted);">Deine aktuelle Energie: <span style="color:var(--success); font-weight:bold;">${game.energy}%</span></p>
+                    <button class="primary-btn" style="background:var(--accent); color:#000; margin-top:20px;" onclick="startMatchEvents()">ANPFIFF</button>
+                </div>
+            `;
+        }
+    }
+
+    function updateStatsUI() {
+        document.getElementById('stat-matches').innerText = game.stats.matches;
+        document.getElementById('stat-goals').innerText = game.stats.goals;
+        document.getElementById('stat-wins').innerText = game.stats.wins;
+        let winrate = game.stats.matches > 0 ? Math.round((game.stats.wins / game.stats.matches) * 100) : 0;
+        document.getElementById('stat-winrate').innerText = winrate + "%";
+        document.getElementById('stat-sponsor').innerText = game.sponsorName;
+    }
+
+    function updateAllData() {
+        checkTrophies();
+        document.getElementById('bar-shoot').innerText = game.shooting;
+        document.getElementById('bar-ath').innerText = game.athleticism;
+        document.getElementById('bar-iq').innerText = game.iq;
+        document.getElementById('bar-nrg').innerText = game.energy + "%";
+        document.getElementById('bar-money').innerText = game.money.toLocaleString() + " €";
+
+        document.getElementById('hub-name').innerText = game.name;
+        document.getElementById('hub-team').innerText = game.club;
+        document.getElementById('hub-date').innerText = `Woche ${game.week}/11`;
+        document.getElementById('hub-age').innerText = `Alter ${game.age} | Rep: ${game.reputation}`;
+        document.getElementById('hub-next-opp').innerText = schedule[game.week - 1];
+        document.getElementById('badge-days').innerText = `${game.daysLeft} Tage`;
+
+        let injuryElem = document.getElementById('hub-injury-status');
+        if (game.injuryWeeks > 0) {
+            injuryElem.innerText = `Verletzt (${game.injuryWeeks} Wo.)`;
+            injuryElem.style.color = "var(--danger)";
+        } else {
+            injuryElem.innerText = "Fit & Gesund";
+            injuryElem.style.color = "var(--success)";
+        }
+
+        let trustElem = document.getElementById('hub-trust-status');
+        let trustRole = game.coachTrust >= 70 ? "Startelf" : (game.coachTrust >= 40 ? "Rotation" : "Ersatzbank ⚠️");
+        trustElem.innerText = `${game.coachTrust}% (${trustRole})`;
+        trustElem.style.color = game.coachTrust < 40 ? "var(--danger)" : "var(--accent)";
+
+        let aptText = game.apartmentLevel === 0 ? "Elternhaus / WG-Zimmer (+10% Regeneration)" : (game.apartmentLevel === 1 ? "Stadtwohnung (+18% Regeneration)" : "Luxus-Penthouse (+25% Regeneration)");
+        document.getElementById('shop-apt-status').innerText = `Aktuell: ${aptText}`;
+        if (game.apartmentLevel >= 2) document.getElementById('btn-buy-apt').disabled = true;
+
+        let carText = game.carLevel === 0 ? "Öffentliche Verkehrsmittel" : "Sportwagen (Maximaler Style)";
+        document.getElementById('shop-car-status').innerText = `Aktuell: ${carText}`;
+        if (game.carLevel >= 1) document.getElementById('btn-buy-car').disabled = true;
+
+        let noDays = game.daysLeft <= 0 || game.injuryWeeks > 0;
+        document.getElementById('train-days-left').innerText = game.injuryWeeks > 0 ? "Verletzt!" : `${game.daysLeft} Tage übrig`;
+        document.getElementById('btn-tr-shoot').disabled = noDays;
+        document.getElementById('btn-tr-gym').disabled = noDays;
+        document.getElementById('btn-tr-iq').disabled = noDays;
+        document.getElementById('btn-tr-rest').disabled = game.injuryWeeks > 0;
+        document.getElementById('train-msg').innerText = game.injuryWeeks > 0 ? "Du bist verletzt und kannst nicht trainieren!" : (noDays ? "Alle Trainingstage verbraucht. Auf zum Spieltag!" : "");
+
+        let shoeText = game.activeBoostWeeks > 0 ? `Aktiv (${game.activeBoostWeeks} Spiele)` : "Leistungs-Boost für 3 Spiele.";
+        document.getElementById('shop-shoe-status').innerText = shoeText;
+
+        leagueTeams.sort((a, b) => b.points - a.points || b.goalsFor - a.goalsFor);
+        let tbody = document.getElementById('league-table-body');
+        tbody.innerHTML = "";
+        leagueTeams.forEach((team, index) => {
+            tbody.innerHTML += `<tr class="${team.isPlayer ? 'is-player' : ''}"><td>${index + 1}</td><td>${team.name}</td><td style="text-align:center;">${team.played}</td><td style="text-align:center;">${team.goalsFor}</td><td style="text-align:center; font-weight:bold;">${team.points}</td></tr>`;
+        });
+    }
+
+    /* --- TRAINING --- */
+    function train(type) {
+        if (game.daysLeft <= 0 || game.injuryWeeks > 0) return;
+        let energyCostFactor = game.hasPhysioActive ? 0.8 : 1.0;
+
+        if (type === 'shooting') {
+            let cost = Math.round(15 * energyCostFactor);
+            if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
+            game.shooting += 1; game.energy -= cost;
+            game.coachTrust = Math.min(100, game.coachTrust + 1);
+            logTimeline("Training", "Wurftraining absolviert (+1 Wurf, +1 Vertrauen).");
+        } else if (type === 'gym') {
+            let cost = Math.round(20 * energyCostFactor);
+            if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
+            game.athleticism += 1; game.energy -= cost;
+            game.coachTrust = Math.min(100, game.coachTrust + 1);
+            logTimeline("Training", "Kraftraum absolviert (+1 Athletik, +1 Vertrauen).");
+        } else if (type === 'tactics') {
+            let cost = Math.round(10 * energyCostFactor);
+            if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
+            game.iq += 1; game.energy -= cost;
+            game.coachTrust = Math.min(100, game.coachTrust + 1);
+            logTimeline("Training", "Videoanalyse absolviert (+1 IQ, +1 Vertrauen).");
+        } else if (type === 'rest') {
+            game.energy = Math.min(100, game.energy + 45);
+            logTimeline("Pause", "Regenerationstag eingelegt.");
+        }
+
+        game.daysLeft--;
+        checkInjuryRisk();
+        updateAllData();
+    }
+
+    /* --- SHOP --- */
+    function buyItem(type, cost) {
+        if (game.money < cost) { alert("Nicht genug Geld!"); return; }
+        game.money -= cost;
+
+        if (type === 'shoes') {
+            game.activeBoostWeeks = 3;
+            logTimeline("Shop", "High-Tech Handballschuhe gekauft (Boost aktiv).", "event");
+            alert("Schuhe erfolgreich gekauft!");
+        } else if (type === 'psychologist') {
+            game.iq += 4;
+            logTimeline("Shop", "Sportpsychologe engagiert (+4 IQ).", "event");
+            alert("Mental-Coach gebucht!");
+        } else if (type === 'physio') {
+            game.energy = 100; game.hasPhysioActive = true;
+            logTimeline("Shop", "Physio-Abo gestartet.", "event");
+            alert("Physio-Behandlung abgeschlossen!");
+        } else if (type === 'trainer') {
+            game.shooting += 3; game.athleticism += 3; game.iq += 3;
+            logTimeline("Shop", "Personal Trainer gebucht.", "event");
+            alert("Intensiv-Training erfolgreich!");
+        } else if (type === 'energy') {
+            game.energy = 100;
+            logTimeline("Shop", "Energy-Drink verbraucht.", "event");
+            alert("Energie auf 100% aufgeladen!");
+        }
+        updateAllData();
+    }
+
+    /* --- MATCH FLOW --- */
+    const allMatchScenarios = [
+        { title: "Tempogegenstoß (1. Welle)", text: "Du sprintest nach einem Ballgewinn nach vorn. Was tust du?", options: [ { text: "Voller Sprungwurf im Konter", change: 1, msg: "Sicherer Treffer im Konter!" }, { text: "Querpass auf den Außen", change: 1, msg: "Sauberer Assist." }, { text: "Zu hektischer Abschluss", change: -1, msg: "Konter vergeben, Torwart hält." } ] },
+        { title: "Abwehr gegen Rückraum", text: "Der Gegner setzt zum harten Schlagwurf an.", options: [ { text: "Aktiv im Block entgegenstellen", change: 1, msg: "Starker Block im Innendekor!" }, { text: "Kompakt in der Deckung bleiben", change: 0, msg: "Solide Abwehrarbeit." }, { text: "Zu spät herausgetreten", change: -1, msg: "Gegentor aus dem Rückraum kassiert." } ] },
+        { title: "Pick & Roll am Kreis", text: "Dein Kreisläufer stellt eine harte Sperre.", options: [ { text: "Eng in die Nahtstelle brechen", change: 1, msg: "Perfekt durchgebrochen und getroffen!" }, { text: "Direktes Anspiel an den Kreis", change: 1, msg: "Guter Pass ans Kreis-Zentrum." }, { text: "Falsches Timing bei der Sperre", change: -1, msg: "Stürmerfoul gepfiffen." } ] },
+        { title: "Siebenmeter-Duell", text: "Du trittst an der 7-Meter-Linie an.", options: [ { text: "Knallhart in den Winkel zimmern", change: 1, msg: "Unhaltbarer 7-Meter in den Winkel!" }, { text: "Cleverer Aufsetzer durch die Beine", change: 1, msg: "Schöner Trick, der Ball sitzt." }, { text: "Nervös verworfen", change: -1, msg: "Siebenmeter an den Pfosten gesetzt!" } ] },
+        { title: "Unterzahlspiel (Zeitstrafe)", text: "Dein Team ist in Unterzahl. Der Gegner baut Druck auf.", options: [ { text: "Aggressive Ball-Raum-Verteidigung", change: 1, msg: "Ball in Unterzahl stark erobert!" }, { text: "Tief und kompakt verschieben", change: 0, msg: "Unterzahl sicher überstanden." }, { text: "Lücke in der Deckung offenbart", change: -1, msg: "Gegentor in Unterzahl kassiert." } ] }
+    ];
+
+    function startMatchEvents() {
+        if (game.injuryWeeks > 0) return;
+        checkInjuryRisk();
+        if (game.injuryWeeks > 0) {
+            openScreen('screen-hub');
+            return;
+        }
+
+        matchData.opponent = schedule[game.week - 1];
+        let boost = game.activeBoostWeeks > 0 ? 1.15 : 1.0;
+        if (game.activeBoostWeeks > 0) game.activeBoostWeeks--;
+
+        let tierBonus = (game.tier * 1.5);
+        let nrg = game.energy / 100;
+        let trustPenalty = game.coachTrust < 40 ? 0.75 : 1.0;
+        let pwr = (((game.shooting * 0.4) + (game.athleticism * 0.3) + (game.iq * 0.3)) * nrg * boost) * trustPenalty;
+
+        matchData.oppGoals = Math.floor(23 + (game.tier * 1.2) + (Math.random() * 5));
+        matchData.playerGoals = Math.floor(22 + (pwr / 16) - tierBonus + (Math.random() * 3));
+        matchData.scoreBonus = 0;
+
+        let shuffled = [...allMatchScenarios].sort(() => 0.5 - Math.random());
+        matchData.scenariosQueue = shuffled.slice(0, 3);
+        matchData.currentScenarioIdx = 0;
+
+        renderNextScenario();
+    }
+
+    function renderNextScenario() {
+        let container = document.getElementById('match-container');
+        if (matchData.currentScenarioIdx < matchData.scenariosQueue.length) {
+            let sc = matchData.scenariosQueue[matchData.currentScenarioIdx];
+            matchData.currentScenarioIdx++;
+            let html = `<div style="text-align:center; margin-bottom:20px;"><span style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; letter-spacing:2px;">Taktik-Event ${matchData.currentScenarioIdx}/3</span><h3 style="color:#fff; margin-top:5px; font-size:1.2rem;">${sc.title}</h3><p style="color:var(--text-muted); font-size:0.9rem;">${sc.text}</p></div>`;
+            sc.options.forEach(opt => { html += `<button class="action-btn" onclick="applyScenarioResult(${opt.change}, '${opt.msg}')" style="text-align:center; justify-content:center;">${opt.text}</button>`; });
+            container.innerHTML = html;
+        } else {
+            finalizeMatchResult();
+        }
+    }
+
+    function applyScenarioResult(change, msg) {
+        matchData.scoreBonus += change;
+        logTimeline("Spiel-Event", msg, change < 0 ? "match" : "normal");
+        renderNextScenario();
+    }
+
+    function finalizeMatchResult() {
+        matchData.playerGoals += matchData.scoreBonus;
+        if (matchData.playerGoals < 17) matchData.playerGoals = 17;
+        if (matchData.playerGoals > 35) matchData.playerGoals = 35;
+
+        let playerTeam = leagueTeams.find(t => t.isPlayer);
+        playerTeam.played++;
+        playerTeam.goalsFor += (matchData.playerGoals - matchData.oppGoals);
+        
+        let myGoals = Math.floor(matchData.playerGoals * 0.35 + (game.shooting / 25));
+        
+        game.stats.matches++;
+        game.stats.goals += myGoals;
+
+        let titleText, pointsStr;
+        if (matchData.playerGoals > matchData.oppGoals) {
+            playerTeam.points += 2; pointsStr = "SIEG"; titleText = "Sieg gegen " + matchData.opponent;
+            matchData.lastMatchWon = true;
+            game.stats.wins++;
+            game.coachTrust = Math.min(100, game.coachTrust + 4);
+        } else if (matchData.playerGoals === matchData.oppGoals) {
+            playerTeam.points += 1; pointsStr = "REMIS"; titleText = "Unentschieden gegen " + matchData.opponent;
+            matchData.lastMatchWon = false;
+            game.coachTrust = Math.min(100, game.coachTrust + 1);
+        } else {
+            playerTeam.points += 0; pointsStr = "NIEDERLAGE"; titleText = "Niederlage gegen " + matchData.opponent;
+            matchData.lastMatchWon = false;
+            game.coachTrust = Math.max(10, game.coachTrust - 5);
+        }
+        
+        logTimeline("Abpfiff", `${titleText} (${matchData.playerGoals}:${matchData.oppGoals}). Du warfst ${myGoals} Tore.`, "match");
+
+        leagueTeams.forEach(t => {
+            if (!t.isPlayer) {
+                t.played++; let simG = Math.floor(23 + Math.random() * 7); t.goalsFor += (simG - 25);
+                let simP = Math.random(); if (simP > 0.45) t.points += 2; else if (simP > 0.25) t.points += 1;
+            }
+        });
+
+        let baseMatchMoney = matchData.playerGoals * 12;
+        game.money += baseMatchMoney;
+        if (pointsStr === "SIEG") game.reputation += 2;
+
+        if (game.tier >= 3 && Math.random() < 0.65) {
+            triggerPostMatchInterview(matchData.lastMatchWon, matchData.playerGoals, matchData.opponent);
+        } else {
+            renderMatchResultScreen(pointsStr, myGoals);
+        }
+    }
+
+    function renderMatchResultScreen(pointsStr, myGoals) {
+        document.getElementById('match-container').innerHTML = `
+            <div class="match-header" style="border:none;">
+                <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px;">Endergebnis</div>
+                <div class="match-vs">${pointsStr}</div>
+                <div class="match-score">${matchData.playerGoals} : ${matchData.oppGoals}</div>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:20px;">Deine Leistung: ${myGoals} Tore beigesteuert.</p>
+                <button class="primary-btn" style="margin-top:20px;" onclick="proceedNextWeek()">Zurück zum Dashboard & Fortfahren</button>
+            </div>
+        `;
+    }
+
+    /* --- INTERVIEWS --- */
+    const winInterviews = [
+        { q: "Reporter: 'Starke Leistung heute! War das der Schlüssel zum Sieg über {opp}?'", opts: [ { text: "'Absolut, wir haben als Team gekämpft.'", effect: () => { game.reputation += 2; game.coachTrust = Math.min(100, game.coachTrust + 2); logTimeline("Medien", "Lob für Team.", "event"); } }, { text: "'Ich wusste, dass ich Verantwortung übernehmen muss.'", effect: () => { game.shooting += 2; game.reputation -= 1; logTimeline("Medien", "Selbstbewusster Auftritt.", "event"); } } ] },
+        { q: "Reporter: 'Ihr hattet zwischendurch Probleme in der Abwehr. Was lief schief?'", opts: [ { text: "'Wir haben zu spät attackiert, aber draus gelernt.'", effect: () => { game.iq += 2; logTimeline("Medien", "Taktische Analyse.", "event"); } }, { text: "'Wichtig sind am Ende nur die 2 Punkte.'", effect: () => { game.money += 50; logTimeline("Medien", "Pragmatisches Interview.", "event"); } } ] }
+    ];
+
+    const lossInterviews = [
+        { q: "Reporter: 'Eine schmerzhafte Pleite gegen {opp}. Was ist im Angriff passiert?'", opts: [ { text: "'Wir müssen uns alle an die eigene Nase fassen.'", effect: () => { game.reputation += 1; game.shooting += 1; logTimeline("Medien", "Selbstkritische Worte.", "event"); } }, { text: "'Die Schiedsrichterleistung war heute katastrophal.'", effect: () => { game.reputation -= 3; game.coachTrust = Math.max(10, game.coachTrust - 3); logTimeline("Medien", "Schiedsrichter-Kritik.", "match"); } } ] },
+        { q: "Reporter: 'Kritiker sagen, das Team bricht in engen Phasen ein. Wie reagieren Sie?'", opts: [ { text: "'Wir werden im Training doppelt so hart schuften.'", effect: () => { game.athleticism += 2; logTimeline("Medien", "Kampfansage.", "event"); } }, { text: "'Das kommentiere ich lieber nicht.'", effect: () => { logTimeline("Medien", "Kommentarlos geblieben.", "normal"); } } ] }
+    ];
+
+    function triggerPostMatchInterview(isWon, myGoals, oppName) {
+        let pool = isWon ? winInterviews : lossInterviews;
+        let interview = pool[Math.floor(Math.random() * pool.length)];
+        let formattedQ = interview.q.replace("{opp}", oppName);
+
+        let container = document.getElementById('match-container');
+        let html = `<div style="text-align:center; margin-bottom:20px;"><span style="font-size:0.75rem; color:var(--gold); text-transform:uppercase; letter-spacing:2px;">🎙️ Post-Match Interview (Presse)</span><h3 style="color:#fff; margin-top:10px; font-size:1.1rem; line-height:1.4;">${formattedQ}</h3></div>`;
+        interview.opts.forEach((opt, idx) => { html += `<button class="action-btn" onclick="resolveInterview(${idx}, ${isWon}, ${myGoals})" style="text-align:center; justify-content:center;">${opt.text}</button>`; });
+        window.currentInterviewOpts = interview.opts;
+        container.innerHTML = html;
+    }
+
+    function resolveInterview(optIdx, isWon, myGoals) {
+        window.currentInterviewOpts[optIdx].effect();
+        let pointsStr = matchData.playerGoals > matchData.oppGoals ? "SIEG" : (matchData.playerGoals === matchData.oppGoals ? "REMIS" : "NIEDERLAGE");
+        renderMatchResultScreen(pointsStr, myGoals);
+    }
+
+    function proceedNextWeek() {
+        game.daysLeft = 4;
+        game.week++;
+
+        let regenBonus = 40 + (game.apartmentLevel * 8);
+        game.energy = Math.min(100, game.energy + regenBonus);
+
+        if (game.injuryWeeks > 0) {
+            game.injuryWeeks--;
+            if (game.injuryWeeks === 0) {
+                logTimeline("Reha", "Du hast deine Verletzung vollständig auskuriert und bist wieder fit!", "event");
+            }
+        }
+
+        if (game.weeklySponsorBonus > 0) game.money += game.weeklySponsorBonus;
+
+        if (game.week > 11) {
+            game.week = 1; game.age++; game.seasonYear++;
+            logTimeline("Saisonende", `Saison beendet. Alter erhöht auf ${game.age}.`, "event");
+            triggerTransferMarket();
+            return;
+        }
+        updateAllData();
+        openScreen('screen-hub');
+    }
+
+    /* --- TRANSFER MARKET & SPONSORS --- */
+    function triggerTransferMarket() {
+        let sponsorOffers = [
+            { name: "Lokale Sparkasse", weekly: 150, req: 10, desc: "Fester regionaler Partner." },
+            { name: "Ausrüster Kempa", weekly: 350, req: 25, desc: "Lukrativer Vertrag für Talente." },
+            { name: "Energy Drink Red Power", weekly: 700, req: 45, desc: "Top-Sponsor für etablierte Stars." }
+        ];
+
+        let availableSponsors = sponsorOffers.filter(s => game.reputation >= s.req);
+        if (availableSponsors.length === 0) availableSponsors = [sponsorOffers[0]];
+
+        let sponsorHtml = `<h3 style="color:var(--gold); margin-bottom:10px;">🤝 Sponsorenvertrag wählen</h3>`;
+        availableSponsors.forEach(s => {
+            sponsorHtml += `<div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid var(--border);"><strong>${s.name}</strong> <span style="color:var(--gold); float:right;">+${s.weekly} € / Woche</span><br><small style="color:var(--text-muted);">${s.desc} (Voraussetzung: Ansehen ${s.req})</small><button class="primary-btn" style="margin-top:8px; padding:6px;" onclick="acceptSponsor('${s.name}', ${s.weekly})">Sponsor wählen</button></div>`;
+        });
+        document.getElementById('sponsor-offer-box').innerHTML = sponsorHtml;
+
+        let offers = [];
+        if (game.tier === 1) offers = [{ c: "Füchse Berlin U19", t: 2, s: 600, r: "Stamm", st: "⭐⭐", d: "Top-NLZ." }, { c: "THW Kiel Jun.", t: 2, s: 700, r: "Rotation", st: "⭐⭐", d: "Profistrukturen." }, { c: `${game.region} U19`, t: 1, s: 250, r: "Stamm", st: "⭐", d: "Heimatverein." }];
+        else if (game.tier === 2) offers = [{ c: "Oranienburger HC", t: 3, s: 1600, r: "Stamm", st: "⭐⭐⭐", d: "3. Liga." }, { c: "HC Empor Rostock", t: 3, s: 1800, r: "Stamm", st: "⭐⭐⭐", d: "Tradition." }];
+        else if (game.tier === 3) offers = [{ c: "VfL Potsdam", t: 4, s: 3500, r: "Stammspieler", st: "⭐⭐⭐⭐", d: "2. HBL." }, { c: "TuS N-Lübbecke", t: 4, s: 4000, r: "Rotation", st: "⭐⭐⭐⭐", d: "2. HBL." }];
+        else if (game.tier === 4) offers = [{ c: "SC Magdeburg", t: 5, s: 9000, r: "Stammspieler", st: "⭐⭐⭐⭐⭐", d: "1. HBL." }, { c: "Füchse Berlin", t: 5, s: 10000, r: "Stammspieler", st: "⭐⭐⭐⭐⭐", d: "1. HBL." }];
+        else offers = [{ c: "FC Barcelona", t: 6, s: 18000, r: "Star", st: "⭐⭐⭐⭐⭐+", d: "Champions League." }, { c: "PSG Handball", t: 6, s: 20000, r: "Star", st: "⭐⭐⭐⭐⭐+", d: "Weltspitze." }];
+
+        let html = `<h3 style="color:var(--accent); margin-bottom:10px;">🤾‍♂️ Vereinswechsel</h3>`;
+        offers.forEach(o => {
+            html += `<div class="card" style="margin-bottom:15px; padding:15px; background:rgba(0,0,0,0.2);"><div style="display:flex; justify-content:space-between;"><strong style="color:#fff; font-size:1.05rem;">${o.c}</strong><span style="color:var(--gold); font-size:0.9rem;">${o.st}</span></div><span style="font-size:0.75rem; color:var(--text-muted);">${o.d}</span><br><div style="margin-top:6px; font-size:0.85rem;">Rolle: <i>${o.r}</i> | <b style="color:var(--gold);">💰 ${o.s} € / W</b></div><button class="primary-btn" style="margin-top:10px; padding:8px;" onclick="acceptOffer('${o.c}', ${o.t}, ${o.s})">Unterschreiben & Weiter</button></div>`;
+        });
+        document.getElementById('transfer-offers-container').innerHTML = html;
+        document.getElementById('global-top-bar').style.display = 'none';
+        openScreen('screen-transfer');
+    }
+
+    function acceptSponsor(name, weekly) {
+        game.sponsorName = name;
+        game.weeklySponsorBonus = weekly;
+        logTimeline("Sponsor", `Sponsorenvertrag mit ${name} unterschrieben (+${weekly} €/Woche).`, "event");
+        alert(`Sponsor ${name} gewählt!`);
+        checkTrophies();
+    }
+
+    function acceptOffer(clubName, newTier, salary) {
+        game.club = clubName; game.tier = newTier; game.money += (salary * 2);
+        initLeague(); logTimeline("Transfer", `Neuer Verein: ${clubName}.`, "event");
+        document.getElementById('global-top-bar').style.display = 'grid';
+        updateAllData(); openScreen('screen-hub');
+    }
+
+    /* --- LOGS --- */
+    function logTimeline(tag, text, type = 'normal') {
+        game.logs.push({ tag, text, type, week: game.week });
+        renderLogsUI();
+    }
+
+    function renderLogsUI() {
+        let box = document.getElementById('timeline-box');
+        box.innerHTML = "";
+        game.logs.forEach(l => {
+            box.innerHTML += `<div class="timeline-item ${l.type}"><span class="timeline-tag">${l.tag} <span style="font-weight:normal; text-transform:none;">- Woche ${l.week}</span></span>${l.text}</div>`;
+        });
+    }
+</script>
+
+</body>
+</html>
