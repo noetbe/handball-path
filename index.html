@@ -123,7 +123,8 @@
         .stat-item span { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
         .stat-item strong { font-size: 1.1rem; color: #fff; font-weight: 800; }
 
-        /* TROPHY ITEMS */
+        /* SQUAD & TROPHY ITEMS */
+        .squad-member { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .trophy-item { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; transition: all 0.2s; }
         .trophy-item.unlocked { border-color: var(--gold); background: rgba(251, 191, 36, 0.05); }
         .trophy-icon { font-size: 2rem; width: 50px; text-align: center; filter: grayscale(1); opacity: 0.4; }
@@ -178,18 +179,37 @@
         <div class="form-group">
             <label>Spielposition</label>
             <select id="setup-position">
-                <option value="Rückraum-Shooter">Rückraum-Shooter (Halblinker)</option>
-                <option value="Spielmacher">Spielmacher (Mitte)</option>
-                <option value="Außenspieler">Außenspieler (Außen)</option>
-                <option value="Kreisläufer">Kreisläufer</option>
-                <option value="Torwart">Torwart</option>
+                <option value="LA">Linksaußen (LA)</option>
+                <option value="RA">Rechtsaußen (RA)</option>
+                <option value="RL">Rückraum Links (RL)</option>
+                <option value="RR">Rückraum Rechts (RR)</option>
+                <option value="RM">Rückraum Mitte (RM)</option>
+                <option value="KM">Kreisläufer (KM)</option>
+                <option value="TW">Torwart (TW)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Heimat-Region & Verband</label>
+            <select id="setup-region" onchange="updateClubsList()">
+                <option value="Berlin / Brandenburg">Berlin / Brandenburg</option>
+                <option value="Norddeutschland">Norddeutschland</option>
+                <option value="Rhein-Neckar">Rhein-Neckar Region</option>
+                <option value="Westfalen / NRW">Westfalen / NRW</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Heimat-Verein (Jugend / Start)</label>
+            <select id="setup-club">
+                <!-- Dynamisch gefüllt -->
             </select>
         </div>
 
         <div class="form-group">
             <label>Karriere-Startzeitpunkt</label>
             <select id="setup-era">
-                <option value="15">Jugendlicher (Alter 15 - Start im Jugendbereich)</option>
+                <option value="15">Jugendlicher (Alter 15 - Pre-Season & Jugend)</option>
                 <option value="18">Junger Erwachsener (Alter 18 - 3. Liga)</option>
                 <option value="21">Profi (Alter 21 - 1. Bundesliga ⭐⭐⭐⭐⭐)</option>
             </select>
@@ -207,20 +227,10 @@
         <div class="form-group">
             <label>Primärer Fokus-Schwerpunkt</label>
             <select id="setup-focus">
-                <option value="shooting">Wurf-Spezialist (+12 Wurf, +4 Übersicht)</option>
-                <option value="athleticism">Athletik-Maschine (+12 Athletik, +4 Wurf)</option>
-                <option value="iq">Spielmacher-IQ (+12 Übersicht, +4 Athletik)</option>
-                <option value="balanced_focus">Vielseitiger Allrounder (+6 auf alles)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Heimat-Region</label>
-            <select id="setup-region">
-                <option value="Berlin / Brandenburg">Berlin / Brandenburg</option>
-                <option value="Norddeutschland">Norddeutschland</option>
-                <option value="Rhein-Neckar">Rhein-Neckar Region</option>
-                <option value="Westfalen / NRW">Westfalen / NRW</option>
+                <option value="shooting">Wurf-Spezialist (+6 Wurf, +2 IQ)</option>
+                <option value="athleticism">Athletik-Maschine (+6 Athletik, +2 Wurf)</option>
+                <option value="iq">Spielmacher-IQ (+6 IQ, +2 Athletik)</option>
+                <option value="balanced_focus">Vielseitiger Allrounder (+3 auf alles)</option>
             </select>
         </div>
 
@@ -273,7 +283,7 @@
                 <span style="font-size:1.2rem;">💪</span>
             </div>
             <div class="status-pill">
-                <div><span>Trainer-Vertrauen</span><br><strong id="hub-trust-status" style="color:var(--accent);">75% (Startelf)</strong></div>
+                <div><span>Starting-Seven</span><br><strong id="hub-trust-status" style="color:var(--accent);">75% (Stamm)</strong></div>
                 <span style="font-size:1.2rem;">🤝</span>
             </div>
         </div>
@@ -300,15 +310,15 @@
                 <div class="dash-title">Trophäen</div>
                 <div class="dash-desc">Erfolge & Meilensteine</div>
             </div>
+            <div class="dash-card" onclick="openScreen('screen-squad')">
+                <span class="dash-icon">👥</span>
+                <div class="dash-title">Kader & Mitspieler</div>
+                <div class="dash-desc">Teamkollegen & Stärken</div>
+            </div>
             <div class="dash-card" onclick="openScreen('screen-stats')">
                 <span class="dash-icon">📈</span>
                 <div class="dash-title">Statistiken</div>
                 <div class="dash-desc">Rekorde & Bilanzen</div>
-            </div>
-            <div class="dash-card" onclick="openScreen('screen-log')">
-                <span class="dash-icon">📖</span>
-                <div class="dash-title">Karriere-Log</div>
-                <div class="dash-desc">Historie</div>
             </div>
 
             <div class="dash-card match" onclick="openScreen('screen-match-prep')">
@@ -339,6 +349,12 @@
             <button class="action-btn" onclick="train('rest')" id="btn-tr-rest">
                 <span>Regeneration<small>Erholung in der Freizeit</small></span><span style="color:var(--success);">+45% NRG</span>
             </button>
+            
+            <!-- Pre-Season Start Button when days are 0 in week 0 -->
+            <div id="preseason-start-container" style="margin-top: 15px; display: none;">
+                <button class="primary-btn" style="background:var(--success); color:#000;" onclick="startActualSeason()">🚀 Saison 1 offiziell starten!</button>
+            </div>
+
             <p id="train-msg" style="font-size:0.8rem; color:var(--text-muted); margin-top:15px; text-align:center;"></p>
         </div>
     </div>
@@ -348,14 +364,14 @@
         <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
         <div class="card">
             <h3>Ausrüstung & Lifestyle</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Verbessere dein Wohnen, fahre bessere Autos oder hole Profi-Boosts.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Verbessere dein Wohnen, fahre Autos oder hole Profi-Boosts.</p>
             
             <div class="action-btn" style="display:block; cursor:default;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <strong style="color:#fff;">🏙️ Eigene Stadtwohnung</strong>
                     <button class="primary-btn" id="btn-buy-apt" style="width:auto; padding:8px 16px; margin:0;" onclick="buyLifestyle('apartment', 5000)">5.000 €</button>
                 </div>
-                <small id="shop-apt-status">Aktuell: Elternhaus / WG-Zimmer (+10% wöchentliche Regeneration)</small>
+                <small id="shop-apt-status">Aktuell: Elternhaus / WG-Zimmer (+10% Regeneration)</small>
             </div>
 
             <div class="action-btn" style="display:block; cursor:default;">
@@ -363,7 +379,7 @@
                     <strong style="color:#fff;">🚗 Eigenes Sport-Auto</strong>
                     <button class="primary-btn" id="btn-buy-car" style="width:auto; padding:8px 16px; margin:0;" onclick="buyLifestyle('car', 12000)">12.000 €</button>
                 </div>
-                <small id="shop-car-status">Aktuell: Öffentliche Verkehrsmittel (+15 Ansehen)</small>
+                <small id="shop-car-status">Aktuell: ÖPNV (+15 Ansehen)</small>
             </div>
 
             <div class="action-btn" style="display:block; cursor:default;">
@@ -376,7 +392,7 @@
 
             <div class="action-btn" style="display:block; cursor:default;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong style="color:#fff;">🧠 Sportpsychologe (Mental-Coach)</strong>
+                    <strong style="color:#fff;">🧠 Sportpsychologe</strong>
                     <button class="primary-btn" style="width:auto; padding:8px 16px; margin:0;" onclick="buyItem('psychologist', 1500)">1.500 €</button>
                 </div>
                 <small>Erhöht dauerhaft deinen Spiel-IQ (+4).</small>
@@ -403,6 +419,16 @@
                 </thead>
                 <tbody id="league-table-body"></tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- SCREEN: SQUAD & TEAMMATES -->
+    <div id="screen-squad" class="screen">
+        <button class="back-btn" onclick="openScreen('screen-hub')">← Zurück zum Dashboard</button>
+        <div class="card">
+            <h3>👥 Kader & Schlüsselspieler</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Deine wichtigsten Teamkollegen in dieser Saison.</p>
+            <div id="squad-container"></div>
         </div>
     </div>
 
@@ -484,7 +510,7 @@
         </div>
     </div>
 
-    <!-- FOOTER RESET BUTTON (2 Klicks zum Start-Screen) -->
+    <!-- FOOTER RESET BUTTON -->
     <div class="footer-reset">
         <button class="reset-btn" onclick="confirmReset()">Spiel neu starten (Reset)</button>
     </div>
@@ -499,11 +525,36 @@
         if(forceTheme) document.getElementById('setup-theme').value = theme;
     }
 
+    /* --- REGIONAL CLUBS & LEAGUES MAPPING --- */
+    const regionalClubs = {
+        "Berlin / Brandenburg": ["Füchse Berlin Jgd.", "VfL Potsdam Jgd.", "Berliner TSC", "SG Hermsdorf", "HC Empor Brandenburg"],
+        "Norddeutschland": ["THW Kiel Jun.", "SG Flensburg U19", "HSV Hamburg Jgd.", "TSV Altenholz"],
+        "Rhein-Neckar": ["Rhein-Neckar Jgd.", "FA Göppingen U19", "SG Pforzheim/Eutingen", "Kronau-Östringen"],
+        "Westfalen / NRW": ["VfL Gummersbach Jgd.", "TBV Lemgo Jgd.", "Eintracht Hagen", "GWD Minden Jgd."]
+    };
+
+    const regionalOpponents = {
+        "Berlin / Brandenburg": ["JSG Spandau", "VfL Tegel Jgd", "HC Empor U17", "Füchse Nachwuchs", "VfL Potsdam Jun", "SGA Berlin", "Berliner TSC", "SG Hermsdorf"],
+        "Norddeutschland": ["SV Werder Bremen", "VfL Bad Schwartau", "THW Kiel II", "SG Flensburg II", "TSV Burgdorf", "HSV Hamburg II", "VfL Horneburg"],
+        "Rhein-Neckar": ["TSG Oftersheim", "Kronau U19", "SG Pforzheim", "HB Bad Wildungen", "Frisch Auf Göppingen II", "TV Großwallstadt"],
+        "Westfalen / NRW": ["JSG Melsungen", "TUSEM Essen Jgd.", "TSV Bayer Dormagen", "VfL Gummersbach II", "GWD Minden II", "HSG Düsseldorf"]
+    };
+
+    function updateClubsList() {
+        let region = document.getElementById('setup-region').value;
+        let clubSelect = document.getElementById('setup-club');
+        clubSelect.innerHTML = "";
+        regionalClubs[region].forEach(c => {
+            clubSelect.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    }
+    window.addEventListener('DOMContentLoaded', () => { updateClubsList(); });
+
     /* --- GAME STATE --- */
     let game = {
-        name: "", position: "", region: "", club: "",
-        tier: 1, week: 1, seasonYear: 1, age: 15,
-        daysLeft: 4, shooting: 35, athleticism: 35, iq: 35,
+        name: "", position: "RL", region: "Berlin / Brandenburg", club: "",
+        tier: 1, week: 0, seasonYear: 1, age: 15, // week 0 = Pre-Season
+        daysLeft: 7, shooting: 35, athleticism: 35, iq: 35,
         energy: 100, money: 300, reputation: 15, activeBoostWeeks: 0,
         weeklySponsorBonus: 0, sponsorName: "Kein Sponsor",
         hasPhysioActive: false, theme: "blue", logs: [],
@@ -512,7 +563,8 @@
         injuryWeeks: 0,
         coachTrust: 75,
         apartmentLevel: 0,
-        carLevel: 0
+        carLevel: 0,
+        teammates: []
     };
 
     const trophiesData = [
@@ -530,7 +582,7 @@
     let matchData = { opponent: "", playerGoals: 0, oppGoals: 0, scenariosQueue: [], currentScenarioIdx: 0, scoreBonus: 0, lastMatchWon: false };
 
     const leagueData = {
-        1: ["JSG Spandau", "VfL Tegel Jgd", "HC Empor U17", "Füchse Nachwuchs", "VfL Potsdam Jun", "SGA Berlin", "Berliner TSC", "SG Hermsdorf"],
+        1: [], // dynamically set by region
         2: ["Füchse Berlin U19", "THW Kiel Jun", "SG Flensburg U19", "SC Magdeburg Jgd", "Rhein-Neckar Jgd", "FA Göppingen U19", "TSV Hannover U19", "Füchse Berlin II"],
         3: ["Oranienburger HC", "HC Empor Rostock", "Stralsunder HV", "TSV Altenholz", "Füchse Berlin II", "VfL Potsdam", "Mecklenburg Schwerin", "HSV Hamburg II"],
         4: ["VfL Potsdam", "TuS N-Lübbecke", "HSG Nordhorn", "Eintracht Hagen", "Dessau-Roßlauer", "GWD Minden", "ASV Hamm", "Bietigheim"],
@@ -539,13 +591,37 @@
     };
 
     function initLeague() {
-        let names = leagueData[game.tier];
+        let rawOpponents = game.tier === 1 ? regionalOpponents[game.region] : leagueData[game.tier];
+        
+        // BUGFIX: Filter out any opponent team that shares core words with player's club to prevent duplicates
+        let clubBaseWords = game.club.toLowerCase().split(' ').filter(w => w.length > 3);
+        let filteredOpponents = rawOpponents.filter(t => {
+            let tLower = t.toLowerCase();
+            if (t === game.club) return false;
+            return !clubBaseWords.some(w => tLower.includes(w));
+        });
+
+        // Fallback if filtering left too few opponents
+        while (filteredOpponents.length < 7) {
+            filteredOpponents.push("SG Jugend Team " + (filteredOpponents.length + 1));
+        }
+
         leagueTeams = [{ name: game.club, played: 0, goalsFor: 0, points: 0, isPlayer: true }];
-        names.forEach(t => { if (t !== game.club) leagueTeams.push({ name: t, played: 0, goalsFor: 0, points: 0, isPlayer: false }); });
+        filteredOpponents.forEach(t => leagueTeams.push({ name: t, played: 0, goalsFor: 0, points: 0, isPlayer: false }));
         
         schedule = [];
         let opponents = leagueTeams.filter(t => !t.isPlayer);
         for (let w = 1; w <= 11; w++) schedule.push(opponents[(w - 1) % opponents.length].name);
+        
+        generateTeammates();
+    }
+
+    function generateTeammates() {
+        game.teammates = [
+            { name: "Jonas Meijer", pos: "TW", rating: game.shooting + Math.floor(Math.random()*6)-3, role: "Stamm-Torhüter" },
+            { name: "Maximilian Brandt", pos: "RM", rating: game.iq + Math.floor(Math.random()*6)-3, role: "Spielmacher" },
+            { name: "Timon Becker", pos: "KM", rating: game.athleticism + Math.floor(Math.random()*6)-3, role: "Abwehrchef & Kreis" }
+        ];
     }
 
     function startCareer() {
@@ -559,16 +635,19 @@
         game.coachTrust = 75;
         game.apartmentLevel = 0;
         game.carLevel = 0;
+        game.week = 0; // Pre-season week 0
+        game.daysLeft = 7; // Pre-season training days
         
         game.name = nameInput;
         game.position = document.getElementById('setup-position').value;
         game.region = document.getElementById('setup-region').value;
+        game.club = document.getElementById('setup-club').value;
         game.theme = document.getElementById('setup-theme').value;
         
         let startEra = parseInt(document.getElementById('setup-era').value);
         game.age = startEra;
 
-        if (startEra === 15) { game.tier = 1; game.club = `${game.region} U17`; game.money = 300; }
+        if (startEra === 15) { game.tier = 1; game.money = 300; }
         else if (startEra === 18) { game.tier = 3; game.club = "Oranienburger HC (3. Liga)"; game.money = 1200; checkTrophies(); }
         else if (startEra === 21) { game.tier = 5; game.club = "SC Magdeburg"; game.money = 5000; game.shooting = 62; game.athleticism = 62; game.iq = 62; checkTrophies(); }
 
@@ -580,14 +659,14 @@
         }
 
         let focus = document.getElementById('setup-focus').value;
-        if (focus === 'shooting') { game.shooting += 8; game.iq += 2; }
-        else if (focus === 'athleticism') { game.athleticism += 8; game.shooting += 2; }
-        else if (focus === 'iq') { game.iq += 8; game.athleticism += 2; }
-        else if (focus === 'balanced_focus') { game.shooting += 4; game.athleticism += 4; game.iq += 4; }
+        if (focus === 'shooting') { game.shooting += 6; game.iq += 2; }
+        else if (focus === 'athleticism') { game.athleticism += 6; game.shooting += 2; }
+        else if (focus === 'iq') { game.iq += 6; game.athleticism += 2; }
+        else if (focus === 'balanced_focus') { game.shooting += 3; game.athleticism += 3; game.iq += 3; }
 
         initLeague();
         document.getElementById('global-top-bar').style.display = 'grid';
-        logTimeline("Start", `Karriere als ${game.position} bei ${game.club} gestartet.`, "event");
+        logTimeline("Pre-Season", `Karriere als ${game.position} bei ${game.club} begonnen. Nutze die 7 Tage Vorbereitung!`, "event");
         updateAllData();
         openScreen('screen-hub');
     }
@@ -631,7 +710,7 @@
             if (game.carLevel >= 1) { alert("Du besitzt bereits einen Sportwagen!"); return; }
             game.money -= cost;
             game.carLevel++;
-            game.reputation += 10;
+            game.reputation += 15;
             logTimeline("Lifestyle", "Sportwagen gekauft.", "event");
             alert("Sportwagen erfolgreich gekauft! Dein Ansehen ist gestiegen.");
         }
@@ -679,6 +758,24 @@
                         <h4>${t.title} ${isUnlocked ? '✅' : '🔒'}</h4>
                         <p>${t.desc}</p>
                     </div>
+                </div>
+            `;
+        });
+    }
+
+    function renderSquadUI() {
+        let container = document.getElementById('squad-container');
+        container.innerHTML = `
+            <div class="squad-member" style="background:rgba(56, 189, 248, 0.1); border-color:var(--accent);">
+                <div><strong>Du (${game.position})</strong><br><small style="color:var(--text-muted);">Eigener Spieler</small></div>
+                <div style="text-align:right;"><strong style="color:var(--accent);">Stärke: ${Math.round((game.shooting+game.athleticism+game.iq)/3)}</strong></div>
+            </div>
+        `;
+        game.teammates.forEach(tm => {
+            container.innerHTML += `
+                <div class="squad-member">
+                    <div><strong>${tm.name} (${tm.pos})</strong><br><small style="color:var(--text-muted);">${tm.role}</small></div>
+                    <div style="text-align:right;"><strong>Wert: ${tm.rating}</strong></div>
                 </div>
             `;
         });
@@ -733,7 +830,7 @@
             game = parsed.game; leagueTeams = parsed.leagueTeams; schedule = parsed.schedule;
             changeTheme(game.theme);
             document.getElementById('global-top-bar').style.display = 'grid';
-            updateAllData(); renderLogsUI(); renderTrophiesUI();
+            updateAllData(); renderLogsUI(); renderTrophiesUI(); renderSquadUI();
             openScreen('screen-hub');
         }
     }
@@ -749,20 +846,36 @@
         
         if (screenId === 'screen-trophies') renderTrophiesUI();
         if (screenId === 'screen-stats') updateStatsUI();
+        if (screenId === 'screen-squad') renderSquadUI();
         
         if (screenId === 'screen-match-prep') {
-            if (game.injuryWeeks > 0) {
-                document.getElementById('match-container').innerHTML = `
+            let matchContainer = document.getElementById('match-container');
+            
+            if (game.week === 0) {
+                matchContainer.innerHTML = `
                     <div class="match-header" style="border:none;">
-                        <h3 style="color:var(--danger);">Verletzt!</h3>
-                        <p style="color:var(--text-muted); font-size:0.9rem; margin:15px 0;">Du kannst wegen einer Verletzung noch ${game.injuryWeeks} Woche(n) nicht spielen.</p>
+                        <h3 style="color:var(--gold);">Pre-Season Vorbereitung</h3>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin:15px 0;">Die Saison hat noch nicht begonnen. Beende im Trainingszentrum deine Vorbereitungstage und starte die Saison!</p>
                         <button class="primary-btn" onclick="openScreen('screen-hub')">Zurück zum Dashboard</button>
                     </div>
                 `;
                 return;
             }
 
-            document.getElementById('match-container').innerHTML = `
+            // BUGFIX: Injury Reha handler so player doesn't get soft-locked
+            if (game.injuryWeeks > 0) {
+                matchContainer.innerHTML = `
+                    <div class="match-header" style="border:none;">
+                        <h3 style="color:var(--danger);">Verletzt!</h3>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin:15px 0;">Du bist verletzt und kannst nicht spielen. Verbleibende Reha-Zeit: <strong>${game.injuryWeeks} Woche(n)</strong>.</p>
+                        <button class="primary-btn" style="background:var(--accent); color:#000; margin-bottom:10px;" onclick="progressInjuryWeek()">Reha-Woche absolvieren (Woche überspringen)</button>
+                        <button class="primary-btn" style="background:transparent; border:1px solid var(--border); color:var(--text-main);" onclick="openScreen('screen-hub')">Zurück zum Dashboard</button>
+                    </div>
+                `;
+                return;
+            }
+
+            matchContainer.innerHTML = `
                 <div class="match-header" style="border:none;">
                     <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px;">Spieltag - Woche ${game.week}</div>
                     <div class="match-vs">${schedule[game.week - 1]}</div>
@@ -792,9 +905,9 @@
 
         document.getElementById('hub-name').innerText = game.name;
         document.getElementById('hub-team').innerText = game.club;
-        document.getElementById('hub-date').innerText = `Woche ${game.week}/11`;
+        document.getElementById('hub-date').innerText = game.week === 0 ? "Pre-Season" : `Woche ${game.week}/11`;
         document.getElementById('hub-age').innerText = `Alter ${game.age} | Rep: ${game.reputation}`;
-        document.getElementById('hub-next-opp').innerText = schedule[game.week - 1];
+        document.getElementById('hub-next-opp').innerText = game.week === 0 ? "Vorbereitung läuft..." : schedule[game.week - 1];
         document.getElementById('badge-days').innerText = `${game.daysLeft} Tage`;
 
         let injuryElem = document.getElementById('hub-injury-status');
@@ -807,7 +920,7 @@
         }
 
         let trustElem = document.getElementById('hub-trust-status');
-        let trustRole = game.coachTrust >= 70 ? "Startelf" : (game.coachTrust >= 40 ? "Rotation" : "Ersatzbank ⚠️");
+        let trustRole = game.coachTrust >= 70 ? "Starting-Seven" : (game.coachTrust >= 40 ? "Rotation" : "Ersatzbank ⚠️");
         trustElem.innerText = `${game.coachTrust}% (${trustRole})`;
         trustElem.style.color = game.coachTrust < 40 ? "var(--danger)" : "var(--accent)";
 
@@ -821,11 +934,21 @@
 
         let noDays = game.daysLeft <= 0 || game.injuryWeeks > 0;
         document.getElementById('train-days-left').innerText = game.injuryWeeks > 0 ? "Verletzt!" : `${game.daysLeft} Tage übrig`;
+        
+        // Button disables
         document.getElementById('btn-tr-shoot').disabled = noDays;
         document.getElementById('btn-tr-gym').disabled = noDays;
         document.getElementById('btn-tr-iq').disabled = noDays;
         document.getElementById('btn-tr-rest').disabled = game.injuryWeeks > 0;
-        document.getElementById('train-msg').innerText = game.injuryWeeks > 0 ? "Du bist verletzt und kannst nicht trainieren!" : (noDays ? "Alle Trainingstage verbraucht. Auf zum Spieltag!" : "");
+
+        let preseasonBtnBox = document.getElementById('preseason-start-container');
+        if (game.week === 0 && game.daysLeft <= 0) {
+            preseasonBtnBox.style.display = 'block';
+            document.getElementById('train-msg').innerText = "Vorbereitung abgeschlossen! Starte jetzt in die Saison.";
+        } else {
+            preseasonBtnBox.style.display = 'none';
+            document.getElementById('train-msg').innerText = game.injuryWeeks > 0 ? "Du bist verletzt und machst Reha!" : (noDays ? (game.week === 0 ? "" : "Trainingstage verbraucht. Auf zum Spieltag!") : "");
+        }
 
         let shoeText = game.activeBoostWeeks > 0 ? `Aktiv (${game.activeBoostWeeks} Spiele)` : "Leistungs-Boost für 3 Spiele.";
         document.getElementById('shop-shoe-status').innerText = shoeText;
@@ -838,7 +961,7 @@
         });
     }
 
-    /* --- TRAINING --- */
+    /* --- TRAINING & PRE-SEASON START --- */
     function train(type) {
         if (game.daysLeft <= 0 || game.injuryWeeks > 0) return;
         let energyCostFactor = game.hasPhysioActive ? 0.8 : 1.0;
@@ -848,19 +971,19 @@
             if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
             game.shooting += 1; game.energy -= cost;
             game.coachTrust = Math.min(100, game.coachTrust + 1);
-            logTimeline("Training", "Wurftraining absolviert (+1 Wurf, +1 Vertrauen).");
+            logTimeline("Training", "Wurftraining absolviert (+1 Wurf).");
         } else if (type === 'gym') {
             let cost = Math.round(20 * energyCostFactor);
             if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
             game.athleticism += 1; game.energy -= cost;
             game.coachTrust = Math.min(100, game.coachTrust + 1);
-            logTimeline("Training", "Kraftraum absolviert (+1 Athletik, +1 Vertrauen).");
+            logTimeline("Training", "Kraftraum absolviert (+1 Athletik).");
         } else if (type === 'tactics') {
             let cost = Math.round(10 * energyCostFactor);
             if (game.energy < cost) { alert("Zu müde! Bitte regenerieren."); return; }
             game.iq += 1; game.energy -= cost;
             game.coachTrust = Math.min(100, game.coachTrust + 1);
-            logTimeline("Training", "Videoanalyse absolviert (+1 IQ, +1 Vertrauen).");
+            logTimeline("Training", "Videoanalyse absolviert (+1 IQ).");
         } else if (type === 'rest') {
             game.energy = Math.min(100, game.energy + 45);
             logTimeline("Pause", "Regenerationstag eingelegt.");
@@ -869,6 +992,14 @@
         game.daysLeft--;
         checkInjuryRisk();
         updateAllData();
+    }
+
+    function startActualSeason() {
+        game.week = 1;
+        game.daysLeft = 4;
+        logTimeline("Saisonstart", "Die Pre-Season ist vorbei. Das erste Ligaspiel steht an!", "event");
+        updateAllData();
+        openScreen('screen-hub');
     }
 
     /* --- SHOP --- */
@@ -900,16 +1031,19 @@
         updateAllData();
     }
 
-    /* --- MATCH FLOW --- */
+    /* --- MATCH FLOW & TACTICAL EVENTS --- */
     const allMatchScenarios = [
-        { title: "Tempogegenstoß (1. Welle)", text: "Du sprintest nach einem Ballgewinn nach vorn. Was tust du?", options: [ { text: "Voller Sprungwurf im Konter", change: 1, msg: "Sicherer Treffer im Konter!" }, { text: "Querpass auf den Außen", change: 1, msg: "Sauberer Assist." }, { text: "Zu hektischer Abschluss", change: -1, msg: "Konter vergeben, Torwart hält." } ] },
-        { title: "Abwehr gegen Rückraum", text: "Der Gegner setzt zum harten Schlagwurf an.", options: [ { text: "Aktiv im Block entgegenstellen", change: 1, msg: "Starker Block im Innendekor!" }, { text: "Kompakt in der Deckung bleiben", change: 0, msg: "Solide Abwehrarbeit." }, { text: "Zu spät herausgetreten", change: -1, msg: "Gegentor aus dem Rückraum kassiert." } ] },
-        { title: "Pick & Roll am Kreis", text: "Dein Kreisläufer stellt eine harte Sperre.", options: [ { text: "Eng in die Nahtstelle brechen", change: 1, msg: "Perfekt durchgebrochen und getroffen!" }, { text: "Direktes Anspiel an den Kreis", change: 1, msg: "Guter Pass ans Kreis-Zentrum." }, { text: "Falsches Timing bei der Sperre", change: -1, msg: "Stürmerfoul gepfiffen." } ] },
-        { title: "Siebenmeter-Duell", text: "Du trittst an der 7-Meter-Linie an.", options: [ { text: "Knallhart in den Winkel zimmern", change: 1, msg: "Unhaltbarer 7-Meter in den Winkel!" }, { text: "Cleverer Aufsetzer durch die Beine", change: 1, msg: "Schöner Trick, der Ball sitzt." }, { text: "Nervös verworfen", change: -1, msg: "Siebenmeter an den Pfosten gesetzt!" } ] },
-        { title: "Unterzahlspiel (Zeitstrafe)", text: "Dein Team ist in Unterzahl. Der Gegner baut Druck auf.", options: [ { text: "Aggressive Ball-Raum-Verteidigung", change: 1, msg: "Ball in Unterzahl stark erobert!" }, { text: "Tief und kompakt verschieben", change: 0, msg: "Unterzahl sicher überstanden." }, { text: "Lücke in der Deckung offenbart", change: -1, msg: "Gegentor in Unterzahl kassiert." } ] }
+        { title: "Tempogegenstoß (1. Welle)", text: "Du sprintest nach Ballgewinn nach vorn. Wie schließt du ab?", options: [ { text: "Riskanter Schlagwurf aus dem Lauf", change: 0, msg: "Solider Abschluss im Tempospiel." }, { text: "Kontrollierter Pass auf den Außen", change: 1, msg: "Perfekter Assist zum Tor!" }, { text: "Sicherer Tempogegenstoß-Abschluss", change: 1, msg: "Sicherer Treffer im Konter!" } ] },
+        { title: "Abwehr gegen Rückraum", text: "Der Gegner baut harten Rückraumdruck auf.", options: [ { text: "Spekulatives Heraustreten (ballorientiert)", change: -1, msg: "Zu spekulativ, der Gegner nutzt die Lücke." }, { text: "Kompakt im Innendblock verschieben", change: 1, msg: "Starker Block in der Deckung!" }, { text: "Diszipliniert im Raum verteidigen", change: 0, msg: "Solide Abwehrarbeit." } ] },
+        { title: "Pick & Roll am Kreis", text: "Dein Kreisläufer bietet eine Sperre an.", options: [ { text: "Eng durch die Nahtstelle brechen", change: 1, msg: "Klasse durchgebrochen und eingenetzt!" }, { text: "Direktes Anspiel an den Kreis", change: 1, msg: "Wunderschönes Anspiel an den Kreis." }, { text: "Zu spätes Timing beim Block", change: -1, msg: "Stürmerfoul gepfiffen." } ] },
+        { title: "Siebenmeter-Duell", text: "Du trittst an der 7-Meter-Linie an.", options: [ { text: "Knallhart in den Winkel zimmern", change: 1, msg: "Unhaltbarer 7-Meter in den Winkel!" }, { text: "Cleverer Aufsetzer durch die Beine", change: 1, msg: "Schöner Trick, der Ball sitzt." }, { text: "Sicherer Wurf auf die Torwart-Ecke", change: 0, msg: "Solider Treffer vom Punkt." } ] }
     ];
 
     function startMatchEvents() {
+        if (game.week === 0) {
+            alert("Bitte beende zuerst deine Pre-Season im Trainingszentrum!");
+            return;
+        }
         if (game.injuryWeeks > 0) return;
         checkInjuryRisk();
         if (game.injuryWeeks > 0) {
@@ -927,7 +1061,7 @@
         let pwr = (((game.shooting * 0.4) + (game.athleticism * 0.3) + (game.iq * 0.3)) * nrg * boost) * trustPenalty;
 
         matchData.oppGoals = Math.floor(23 + (game.tier * 1.2) + (Math.random() * 5));
-        matchData.playerGoals = Math.floor(22 + (pwr / 16) - tierBonus + (Math.random() * 3));
+        matchData.playerGoals = Math.floor(22 + (pwr / 16) - tierBonus + (Math.random() * 4));
         matchData.scoreBonus = 0;
 
         let shuffled = [...allMatchScenarios].sort(() => 0.5 - Math.random());
@@ -958,14 +1092,19 @@
 
     function finalizeMatchResult() {
         matchData.playerGoals += matchData.scoreBonus;
+        
+        let myGoals = Math.min(16, Math.max(3, Math.floor(matchData.playerGoals * 0.35 + (game.shooting / 22))));
+        
+        if (myGoals >= 10) {
+            matchData.playerGoals = Math.max(matchData.playerGoals, matchData.oppGoals + (Math.random() > 0.2 ? 2 : 1));
+        }
+
         if (matchData.playerGoals < 17) matchData.playerGoals = 17;
-        if (matchData.playerGoals > 35) matchData.playerGoals = 35;
+        if (matchData.playerGoals > 38) matchData.playerGoals = 38;
 
         let playerTeam = leagueTeams.find(t => t.isPlayer);
         playerTeam.played++;
         playerTeam.goalsFor += (matchData.playerGoals - matchData.oppGoals);
-        
-        let myGoals = Math.floor(matchData.playerGoals * 0.35 + (game.shooting / 25));
         
         game.stats.matches++;
         game.stats.goals += myGoals;
@@ -983,14 +1122,17 @@
         } else {
             playerTeam.points += 0; pointsStr = "NIEDERLAGE"; titleText = "Niederlage gegen " + matchData.opponent;
             matchData.lastMatchWon = false;
-            game.coachTrust = Math.max(10, game.coachTrust - 5);
+            game.coachTrust = Math.max(10, game.coachTrust - 4);
         }
         
         logTimeline("Abpfiff", `${titleText} (${matchData.playerGoals}:${matchData.oppGoals}). Du warfst ${myGoals} Tore.`, "match");
 
         leagueTeams.forEach(t => {
-            if (!t.isPlayer) {
-                t.played++; let simG = Math.floor(23 + Math.random() * 7); t.goalsFor += (simG - 25);
+            if (!t.isPlayer && t.name !== matchData.opponent) {
+                t.played++; 
+                let simG1 = Math.floor(23 + Math.random() * 10);
+                let simG2 = Math.floor(22 + Math.random() * 10);
+                t.goalsFor += (simG1 - simG2);
                 let simP = Math.random(); if (simP > 0.45) t.points += 2; else if (simP > 0.25) t.points += 1;
             }
         });
@@ -999,34 +1141,75 @@
         game.money += baseMatchMoney;
         if (pointsStr === "SIEG") game.reputation += 2;
 
+        window.lastMyGoals = myGoals;
+        window.lastPointsStr = pointsStr;
+
         if (game.tier >= 3 && Math.random() < 0.65) {
-            triggerPostMatchInterview(matchData.lastMatchWon, matchData.playerGoals, matchData.opponent);
+            triggerPostMatchInterview(matchData.lastMatchWon, myGoals, matchData.opponent);
         } else {
             renderMatchResultScreen(pointsStr, myGoals);
         }
     }
 
     function renderMatchResultScreen(pointsStr, myGoals) {
+        let konferenzList = leagueTeams.filter(t => !t.isPlayer && t.name !== matchData.opponent).slice(0, 3);
+        let konferenzHtml = `<div style="margin-top:15px; font-size:0.8rem; color:var(--text-muted); background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;"><strong>Konferenz (Andere Ergebnisse):</strong><br>`;
+        konferenzList.forEach(k => {
+            let g1 = Math.floor(23 + Math.random() * 10);
+            let g2 = Math.floor(22 + Math.random() * 10);
+            konferenzHtml += `• ${k.name} vs. Gegner ${g1}:${g2}<br>`;
+        });
+        konferenzHtml += `</div>`;
+
         document.getElementById('match-container').innerHTML = `
             <div class="match-header" style="border:none;">
                 <div style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px;">Endergebnis</div>
                 <div class="match-vs">${pointsStr}</div>
                 <div class="match-score">${matchData.playerGoals} : ${matchData.oppGoals}</div>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:20px;">Deine Leistung: ${myGoals} Tore beigesteuert.</p>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:15px;">Deine Leistung: ${myGoals} Tore beigesteuert.</p>
+                ${konferenzHtml}
                 <button class="primary-btn" style="margin-top:20px;" onclick="proceedNextWeek()">Zurück zum Dashboard & Fortfahren</button>
             </div>
         `;
     }
 
+    /* --- INJURY REHA HANDLER (FIXES SOFT-LOCK) --- */
+    function progressInjuryWeek() {
+        game.injuryWeeks--;
+        game.energy = Math.min(100, game.energy + 40);
+        if (game.weeklySponsorBonus > 0) game.money += game.weeklySponsorBonus;
+        
+        logTimeline("Reha", `Reha-Fortschritt. Verbleibende Verletzung: ${game.injuryWeeks} Woche(n).`, "event");
+
+        if (game.injuryWeeks === 0) {
+            logTimeline("Reha", "Du hast deine Verletzung vollständig auskuriert!", "event");
+            alert("Du bist wieder voll ffit und bereit fürs Training und den nächsten Spieltag!");
+            openScreen('screen-hub');
+            updateAllData();
+            return;
+        }
+
+        // Advance week count past the missed match
+        game.week++;
+        if (game.week > 11) {
+            game.week = 1; game.age++; game.seasonYear++;
+            triggerTransferMarket();
+            return;
+        }
+
+        updateAllData();
+        openScreen('screen-hub');
+    }
+
     /* --- INTERVIEWS --- */
     const winInterviews = [
-        { q: "Reporter: 'Starke Leistung heute! War das der Schlüssel zum Sieg über {opp}?'", opts: [ { text: "'Absolut, wir haben als Team gekämpft.'", effect: () => { game.reputation += 2; game.coachTrust = Math.min(100, game.coachTrust + 2); logTimeline("Medien", "Lob für Team.", "event"); } }, { text: "'Ich wusste, dass ich Verantwortung übernehmen muss.'", effect: () => { game.shooting += 2; game.reputation -= 1; logTimeline("Medien", "Selbstbewusster Auftritt.", "event"); } } ] },
-        { q: "Reporter: 'Ihr hattet zwischendurch Probleme in der Abwehr. Was lief schief?'", opts: [ { text: "'Wir haben zu spät attackiert, aber draus gelernt.'", effect: () => { game.iq += 2; logTimeline("Medien", "Taktische Analyse.", "event"); } }, { text: "'Wichtig sind am Ende nur die 2 Punkte.'", effect: () => { game.money += 50; logTimeline("Medien", "Pragmatisches Interview.", "event"); } } ] }
+        { q: "Reporter: 'Starke Leistung heute! War das der Schlüssel zum Sieg über {opp}?'", opts: [ { text: "'Absolut, wir haben als geschlossenes Team gekämpft.'", effect: () => { game.reputation += 2; game.coachTrust = Math.min(100, game.coachTrust + 2); logTimeline("Medien", "Lob für das Team.", "event"); } }, { text: "'I ch wusste, dass ich Verantwortung übernehmen muss.'", effect: () => { game.reputation += 1; logTimeline("Medien", "Selbstbewusster Auftritt.", "event"); } } ] },
+        { q: "Reporter: 'Ihr hattet zwischendurch Probleme in der Abwehr. Was lief schief?'", opts: [ { text: "'Wir haben zu spät attackiert, aber draus gelernt.'", effect: () => { game.iq += 1; logTimeline("Medien", "Taktische Analyse.", "event"); } }, { text: "'Wichtig sind am Ende nur die 2 Punkte.'", effect: () => { game.money += 40; logTimeline("Medien", "Pragmatisches Interview.", "event"); } } ] }
     ];
 
     const lossInterviews = [
-        { q: "Reporter: 'Eine schmerzhafte Pleite gegen {opp}. Was ist im Angriff passiert?'", opts: [ { text: "'Wir müssen uns alle an die eigene Nase fassen.'", effect: () => { game.reputation += 1; game.shooting += 1; logTimeline("Medien", "Selbstkritische Worte.", "event"); } }, { text: "'Die Schiedsrichterleistung war heute katastrophal.'", effect: () => { game.reputation -= 3; game.coachTrust = Math.max(10, game.coachTrust - 3); logTimeline("Medien", "Schiedsrichter-Kritik.", "match"); } } ] },
-        { q: "Reporter: 'Kritiker sagen, das Team bricht in engen Phasen ein. Wie reagieren Sie?'", opts: [ { text: "'Wir werden im Training doppelt so hart schuften.'", effect: () => { game.athleticism += 2; logTimeline("Medien", "Kampfansage.", "event"); } }, { text: "'Das kommentiere ich lieber nicht.'", effect: () => { logTimeline("Medien", "Kommentarlos geblieben.", "normal"); } } ] }
+        { q: "Reporter: 'Eine schmerzhafte Pleite gegen {opp}. Was ist im Angriff passiert?'", opts: [ { text: "'Wir müssen uns alle an die eigene Nase fassen.'", effect: () => { game.reputation += 1; game.shooting += 1; logTimeline("Medien", "Selbstkritische Worte.", "event"); } }, { text: "'Das Glück war heute schlicht nicht auf unserer Seite.'", effect: () => { logTimeline("Medien", "Ruhe bewahrt im Interview.", "normal"); } } ] },
+        { q: "Reporter: 'Kritiker sagen, das Team bricht in engen Phasen ein. Wie reagieren Sie?'", opts: [ { text: "'Wir werden im Training doppelt so hart schuften.'", effect: () => { game.athleticism += 1; logTimeline("Medien", "Kampfansage.", "event"); } }, { text: "'Das kommentiere ich lieber nicht.'", effect: () => { logTimeline("Medien", "Kommentarlos geblieben.", "normal"); } } ] }
     ];
 
     function triggerPostMatchInterview(isWon, myGoals, oppName) {
@@ -1036,15 +1219,14 @@
 
         let container = document.getElementById('match-container');
         let html = `<div style="text-align:center; margin-bottom:20px;"><span style="font-size:0.75rem; color:var(--gold); text-transform:uppercase; letter-spacing:2px;">🎙️ Post-Match Interview (Presse)</span><h3 style="color:#fff; margin-top:10px; font-size:1.1rem; line-height:1.4;">${formattedQ}</h3></div>`;
-        interview.opts.forEach((opt, idx) => { html += `<button class="action-btn" onclick="resolveInterview(${idx}, ${isWon}, ${myGoals})" style="text-align:center; justify-content:center;">${opt.text}</button>`; });
+        interview.opts.forEach((opt, idx) => { html += `<button class="action-btn" onclick="resolveInterview(${idx})" style="text-align:center; justify-content:center;">${opt.text}</button>`; });
         window.currentInterviewOpts = interview.opts;
         container.innerHTML = html;
     }
 
-    function resolveInterview(optIdx, isWon, myGoals) {
+    function resolveInterview(optIdx) {
         window.currentInterviewOpts[optIdx].effect();
-        let pointsStr = matchData.playerGoals > matchData.oppGoals ? "SIEG" : (matchData.playerGoals === matchData.oppGoals ? "REMIS" : "NIEDERLAGE");
-        renderMatchResultScreen(pointsStr, myGoals);
+        renderMatchResultScreen(window.lastPointsStr, window.lastMyGoals);
     }
 
     function proceedNextWeek() {
@@ -1057,7 +1239,7 @@
         if (game.injuryWeeks > 0) {
             game.injuryWeeks--;
             if (game.injuryWeeks === 0) {
-                logTimeline("Reha", "Du hast deine Verletzung vollständig auskuriert und bist wieder fit!", "event");
+                logTimeline("Reha", "Du hast deine Verletzung vollständig auskuriert!", "event");
             }
         }
 
@@ -1091,7 +1273,7 @@
         document.getElementById('sponsor-offer-box').innerHTML = sponsorHtml;
 
         let offers = [];
-        if (game.tier === 1) offers = [{ c: "Füchse Berlin U19", t: 2, s: 600, r: "Stamm", st: "⭐⭐", d: "Top-NLZ." }, { c: "THW Kiel Jun.", t: 2, s: 700, r: "Rotation", st: "⭐⭐", d: "Profistrukturen." }, { c: `${game.region} U19`, t: 1, s: 250, r: "Stamm", st: "⭐", d: "Heimatverein." }];
+        if (game.tier === 1) offers = [{ c: "Füchse Berlin U19", t: 2, s: 600, r: "Stamm", st: "⭐⭐", d: "Top-NLZ." }, { c: "THW Kiel Jun.", t: 2, s: 700, r: "Rotation", st: "⭐⭐", d: "Profistrukturen." }, { c: `${game.club} (Verlängern)`, t: 1, s: 300, r: "Stamm", st: "⭐", d: "Heimatverein." }];
         else if (game.tier === 2) offers = [{ c: "Oranienburger HC", t: 3, s: 1600, r: "Stamm", st: "⭐⭐⭐", d: "3. Liga." }, { c: "HC Empor Rostock", t: 3, s: 1800, r: "Stamm", st: "⭐⭐⭐", d: "Tradition." }];
         else if (game.tier === 3) offers = [{ c: "VfL Potsdam", t: 4, s: 3500, r: "Stammspieler", st: "⭐⭐⭐⭐", d: "2. HBL." }, { c: "TuS N-Lübbecke", t: 4, s: 4000, r: "Rotation", st: "⭐⭐⭐⭐", d: "2. HBL." }];
         else if (game.tier === 4) offers = [{ c: "SC Magdeburg", t: 5, s: 9000, r: "Stammspieler", st: "⭐⭐⭐⭐⭐", d: "1. HBL." }, { c: "Füchse Berlin", t: 5, s: 10000, r: "Stammspieler", st: "⭐⭐⭐⭐⭐", d: "1. HBL." }];
